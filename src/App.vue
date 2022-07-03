@@ -82,6 +82,8 @@ export default {
     const themeOverrides = {
       common: {
         primaryColor: "#E28163FF",
+        primaryColorHover: "#E28163FF",
+        primaryColorPressed: "#E28163FF",
       },
     };
 

@@ -1,13 +1,68 @@
 <script>
-import { NCard, NForm, NInput } from "naive-ui";
-import {ref} from "vue"
+import {
+  NCard,
+  NForm,
+  NInput,
+  useMessage,
+  NAutoComplete,
+  NFormItem,
+  NButton,
+  NSpace,
+} from "naive-ui";
+import { ref } from "vue";
 export default {
   components: {
     NCard,
     NForm,
     NInput,
+    NAutoComplete,
+    NFormItem,
+    NButton,
+    NSpace,
   },
-  setup() {},
+  setup() {
+    const formRef = ref(null);
+    const message = useMessage();
+    const loginModel = ref({
+      email: "",
+      password: "",
+    });
+
+    const validateEmail = (email) => {
+      return String(email)
+        .toLowerCase()
+        .match(
+          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        );
+    };
+
+    const rules = {
+      email: [
+        {
+          required: true,
+          trigger: ["input", "blur"],
+        },
+      ],
+      password: [
+        {
+          required: true,
+          message: "Password is required",
+        },
+      ],
+    };
+
+    return {
+      formRef,
+      loginModel,
+      rules,
+      handleEmail(value) {
+        loginModel.value.email = value;
+      },
+      handlePassword(value) {
+        loginModel.value.password = value;
+      },
+    };
+  },
 };
 </script>
 <template>
@@ -41,7 +96,24 @@ export default {
       </div>
       <div class="login">
         <n-card title="Login">
-          <n-form ref="formRef" :model="model" :rules="rules">
+          <n-form ref="formRef" :model="loginModel" :rules="rules">
+            <n-form-item label="Email" path="email">
+              <n-input
+                type="email"
+                :value="loginModel.email"
+                @input="handleEmail"
+              />
+            </n-form-item>
+            <n-form-item label="Password" path="password">
+              <n-input
+                type="password"
+                :value="loginModel.password"
+                @input="handlePassword"
+              />
+            </n-form-item>
+            <n-space justify="end">
+              <n-button>Login</n-button>
+            </n-space>
           </n-form>
         </n-card>
       </div>
@@ -57,6 +129,7 @@ export default {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
+  width: 30vw;
 }
 .blobs {
   position: absolute;
