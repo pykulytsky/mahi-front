@@ -8,8 +8,10 @@ import {
   NFormItem,
   NButton,
   NSpace,
+  NIcon
 } from "naive-ui";
 import { ref } from "vue";
+import { KeyOutline, MailOutline} from "@vicons/ionicons5";
 export default {
   components: {
     NCard,
@@ -19,6 +21,7 @@ export default {
     NFormItem,
     NButton,
     NSpace,
+    NIcon
   },
   setup() {
     const formRef = ref(null);
@@ -36,25 +39,11 @@ export default {
         );
     };
 
-    const rules = {
-      email: [
-        {
-          required: true,
-          trigger: ["input", "blur"],
-        },
-      ],
-      password: [
-        {
-          required: true,
-          message: "Password is required",
-        },
-      ],
-    };
-
     return {
       formRef,
       loginModel,
-      rules,
+      MailOutline,
+      KeyOutline,
       handleEmail(value) {
         loginModel.value.email = value;
       },
@@ -96,20 +85,29 @@ export default {
       </div>
       <div class="login">
         <n-card title="Login">
-          <n-form ref="formRef" :model="loginModel" :rules="rules">
+          <n-form ref="formRef" :model="loginModel">
             <n-form-item label="Email" path="email">
               <n-input
+                size="large"
                 type="email"
-                :value="loginModel.email"
-                @input="handleEmail"
-              />
+                v-model:value="loginModel.email"
+              >
+                <template #prefix>
+                  <n-icon :component="MailOutline" />
+                </template>
+              </n-input>
             </n-form-item>
             <n-form-item label="Password" path="password">
               <n-input
+                size="large"
                 type="password"
-                :value="loginModel.password"
-                @input="handlePassword"
-              />
+                v-model:value="loginModel.password"
+                show-password-on="mousedown"
+              >
+                <template #prefix>
+                  <n-icon :component="KeyOutline" />
+                </template>
+              </n-input>
             </n-form-item>
             <n-space justify="end">
               <n-button>Login</n-button>

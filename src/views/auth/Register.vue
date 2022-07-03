@@ -13,6 +13,7 @@ import {
   NIcon,
 } from "naive-ui";
 import { ref, computed } from "vue";
+import { KeyOutline, MailOutline, PersonOutline } from "@vicons/ionicons5";
 export default {
   components: {
     NCard,
@@ -108,6 +109,9 @@ export default {
       formRef,
       registerModel,
       rules,
+      MailOutline,
+      KeyOutline,
+      PersonOutline,
       currentStep,
       emailValidationStatus: computed(() => {
         if (validateEmail(registerModel.value.email)) {
@@ -208,10 +212,18 @@ export default {
                 v-model:value="registerModel.email"
                 :validation-status="false"
                 :feedback="'sdfdfd'"
-              />
+              >
+                <template #prefix>
+                  <n-icon :component="MailOutline" />
+                </template>
+              </n-input>
             </n-form-item>
             <n-form-item label="Username" path="username">
-              <n-input v-model:value="registerModel.username" />
+              <n-input v-model:value="registerModel.username">
+                <template #prefix>
+                  <n-icon :component="PersonOutline" />
+                </template>
+              </n-input>
             </n-form-item>
             <n-form-item label="Password" path="password">
               <n-input
@@ -219,6 +231,9 @@ export default {
                 show-password-on="mousedown"
                 v-model:value="registerModel.password"
               >
+                <template #prefix>
+                  <n-icon :component="KeyOutline" />
+                </template>
               </n-input>
             </n-form-item>
             <n-form-item label="Confirm Password" path="reenteredPassword">
@@ -226,7 +241,11 @@ export default {
                 type="password"
                 show-password-on="mousedown"
                 v-model:value="registerModel.reenteredPassword"
-              />
+              >
+                <template #prefix>
+                  <n-icon :component="KeyOutline" />
+                </template>
+              </n-input>
             </n-form-item>
           </n-form>
 
