@@ -12,6 +12,7 @@ import 'vue3-lottie/dist/style.css'
 
 import { vElementVisibility } from '@vueuse/components'
 import VueObserveVisibility from 'vue-observe-visibility'
+import { Vue3Mq } from "vue3-mq";
 
 const app = createApp(App)
 
@@ -21,5 +22,8 @@ app.component('scroll-parallax', ScrollParallax);
 app.use(Vue3Lottie)
 app.directive('element-visibility', vElementVisibility)
 app.use(VueObserveVisibility)
+app.use(Vue3Mq, {
+    preset: 'bootstrap5'
+})
 
 app.mount('#app')

@@ -159,6 +159,7 @@ export default {
         else if (currentStep.value === null) currentStep.value = 4;
         else currentStep.value--;
       },
+      finish() {},
     };
   },
 };
@@ -207,12 +208,7 @@ export default {
             :rules="rules"
           >
             <n-form-item label="Email" path="email">
-              <n-input
-                type="email"
-                v-model:value="registerModel.email"
-                :validation-status="false"
-                :feedback="'sdfdfd'"
-              >
+              <n-input type="email" v-model:value="registerModel.email">
                 <template #prefix>
                   <n-icon :component="MailOutline" />
                 </template>

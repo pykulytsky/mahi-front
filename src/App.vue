@@ -237,7 +237,7 @@ export default {
             show-trigger="arrow-circle"
             trigger-style="top: 50%;"
             collapsed-trigger-style="top: 50%; left: -10%;"
-            v-if="showSider && !['/', '/login', '/register'].includes(path)"
+            v-if="showSider && !common.disableSidebar.includes(path)"
           >
             <n-menu :options="menuOptions" />
           </n-layout-sider>
@@ -249,7 +249,7 @@ export default {
               style="max-height: 100vh"
             >
               <n-layout-header
-                v-if="!['/login', '/register'].includes(path)"
+                v-if="!common.disableHeader.includes(path)"
                 id="navbar"
                 :position="'fixed'"
                 :bordered="true"
@@ -265,7 +265,7 @@ export default {
                   <RouterView />
                 </n-layout-content>
               </n-loading-bar-provider>
-              <n-layout-footer v-if="!['/login', '/register'].includes(path)">
+              <n-layout-footer v-if="!common.disableHeader.includes(path)">
                 Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eos
                 debitis expedita esse saepe quod officia deleniti minus aliquid
                 tempore, maxime dolore cupiditate eaque tempora quidem at nemo,

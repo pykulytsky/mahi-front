@@ -5,12 +5,17 @@ export const useCommonStore = defineStore({
   state: () => ({
     _isLoading: false,
     _errorMessage: null,
-    _currentTheme: null
+    _currentTheme: null,
+    _disableHeader: ['/login', '/register', '/reset-password'],
+    _disableSidebar: ['/', '/login', '/register', '/reset-password'],
+    _disableFooter: ['']
   }),
   getters: {
     isLoading: (state) => state._isLoading,
     errorMessage: (state) => state._errorMessage,
-    currentTheme: (state) => state._currentTheme
+    currentTheme: (state) => state._currentTheme,
+    disableHeader: (state) => state._disableHeader,
+    disableSidebar: (state) => state._disableSidebar
   },
   actions: {
     setLoading(currentState) {
