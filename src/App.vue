@@ -31,7 +31,7 @@ import {
   WineOutline as WineIcon,
   HomeOutline as HomeIcon,
 } from "@vicons/ionicons5";
-import { onMounted, watch } from "vue";
+import { onMounted } from "vue";
 import { useCommonStore } from "./stores/common";
 export default {
   components: {
@@ -242,25 +242,23 @@ export default {
             <n-menu :options="menuOptions" />
           </n-layout-sider>
           <n-layout>
-              <n-layout-header
-                v-if="!common.disableHeader.includes(path) && path !== '/'"
-                id="navbar"
-                :position="'fixed'"
-                :bordered="true"
-              >
-                <n-switch
-                  v-model:value="isDarkTheme"
-                  @update:value="handleChange"
-                />
-              </n-layout-header>
+            <n-layout-header
+              v-if="!common.disableHeader.includes(path) && path !== '/'"
+              id="navbar"
+              :position="'fixed'"
+              :bordered="true"
+            >
+              <n-switch
+                v-model:value="isDarkTheme"
+                @update:value="handleChange"
+              />
+            </n-layout-header>
             <n-scrollbar
               v-if="path !== '/'"
               @scroll="onScroll"
               trigger="hover"
               style="max-height: 100vh"
             >
-
-
               <n-loading-bar-provider>
                 <n-layout-content @on-scroll="onScroll">
                   <RouterView />
@@ -302,6 +300,10 @@ export default {
 #navbar {
   backdrop-filter: blur(1px);
   height: 5vh;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  justify-content: space-between;
 }
 #app {
   font-family: "Josefin Sans";

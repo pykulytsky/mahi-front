@@ -5,11 +5,18 @@ import Todo2 from "../assets/lottie/todo2.json";
 import Todo3 from "../assets/lottie/todo3.json";
 import Brain from "../assets/lottie/brain.json";
 import Time1 from "../assets/lottie/time1.json";
+import {onMounted, onUnmounted} from "vue";
 export default {
   components: {
     NGradientText,
   },
   setup() {
+    onMounted(() => {
+      document.documentElement.style.overflow = 'auto'
+    })
+    onUnmounted(() => {
+      document.documentElement.style.overflow = 'hidden'
+    })
     return {
       Todo1,
       Todo2,
