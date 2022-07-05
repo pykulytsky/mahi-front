@@ -36,7 +36,7 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits, ref, toRef, onBeforeUpdate } from "vue";
+import { defineEmits, ref, toRef, onBeforeUpdate } from "vue";
 import { useCommonStore } from "../../stores/common";
 const props = defineProps({
   className: String,

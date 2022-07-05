@@ -242,14 +242,8 @@ export default {
             <n-menu :options="menuOptions" />
           </n-layout-sider>
           <n-layout>
-            <n-scrollbar
-              v-if="path !== '/'"
-              @scroll="onScroll"
-              trigger="hover"
-              style="max-height: 100vh"
-            >
               <n-layout-header
-                v-if="!common.disableHeader.includes(path)"
+                v-if="!common.disableHeader.includes(path) && path !== '/'"
                 id="navbar"
                 :position="'fixed'"
                 :bordered="true"
@@ -259,18 +253,19 @@ export default {
                   @update:value="handleChange"
                 />
               </n-layout-header>
+            <n-scrollbar
+              v-if="path !== '/'"
+              @scroll="onScroll"
+              trigger="hover"
+              style="max-height: 100vh"
+            >
+
 
               <n-loading-bar-provider>
                 <n-layout-content @on-scroll="onScroll">
                   <RouterView />
                 </n-layout-content>
               </n-loading-bar-provider>
-              <n-layout-footer v-if="!common.disableHeader.includes(path)">
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eos
-                debitis expedita esse saepe quod officia deleniti minus aliquid
-                tempore, maxime dolore cupiditate eaque tempora quidem at nemo,
-                >
-              </n-layout-footer>
             </n-scrollbar>
             <n-layout-header
               v-if="path == '/'"

@@ -12,6 +12,7 @@ import {
 } from "naive-ui";
 import { ref } from "vue";
 import { KeyOutline, MailOutline} from "@vicons/ionicons5";
+import { useMq } from "vue3-mq";
 export default {
   components: {
     NCard,
@@ -26,6 +27,7 @@ export default {
   setup() {
     const formRef = ref(null);
     const message = useMessage();
+    const mq = useMq()
     const loginModel = ref({
       email: "",
       password: "",
@@ -44,6 +46,7 @@ export default {
       loginModel,
       MailOutline,
       KeyOutline,
+      mq,
       handleEmail(value) {
         loginModel.value.email = value;
       },
@@ -83,7 +86,7 @@ export default {
           </path>
         </svg>
       </div>
-      <div class="login">
+      <div :class="mq.mdPlus? 'login': 'login-small'">
         <n-card title="Login">
           <n-form ref="formRef" :model="loginModel">
             <n-form-item label="Email" path="email">
@@ -128,7 +131,14 @@ export default {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 30vw;
+  width: 40vw;
+}
+.login-small {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 85vw;
 }
 .blobs {
   position: absolute;

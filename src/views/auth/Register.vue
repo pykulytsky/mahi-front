@@ -14,6 +14,7 @@ import {
 } from "naive-ui";
 import { ref, computed } from "vue";
 import { KeyOutline, MailOutline, PersonOutline } from "@vicons/ionicons5";
+import { useMq } from "vue3-mq";
 export default {
   components: {
     NCard,
@@ -31,6 +32,7 @@ export default {
     const formRef = ref(null);
     const message = useMessage();
     const currentStep = ref(1);
+    const mq = useMq()
     const registerModel = ref({
       email: "",
       username: "",
@@ -109,6 +111,7 @@ export default {
       formRef,
       registerModel,
       rules,
+      mq,
       MailOutline,
       KeyOutline,
       PersonOutline,
@@ -193,9 +196,13 @@ export default {
           </path>
         </svg>
       </div>
-      <div class="register">
+      <div :class="mq.lgPlus? 'register': 'register-small'">
         <n-card title="Create an account">
-          <n-steps :current="currentStep">
+          <n-steps
+            :current="currentStep"
+            :size="mq.current == 'xxl'? 'medium': 'small'"
+            :vertical="mq.smPlus? false: true"
+          >
             <n-step title="Fill your credentials"> </n-step>
             <n-step title="Fill personal data"> </n-step>
             <n-step title="Verify your email"> </n-step>
@@ -265,6 +272,13 @@ export default {
   top: 50%;
   transform: translate(-50%, -50%);
   width: 50vw;
+}
+.register-small {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 85vw;
 }
 .blobs {
   position: absolute;
