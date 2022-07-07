@@ -113,7 +113,7 @@ export default {
               </n-input>
             </n-form-item>
             <n-space justify="end">
-              <n-button>Login</n-button>
+              <n-button type="primary">Login</n-button>
             </n-space>
           </n-form>
 

@@ -245,7 +245,7 @@ export default {
           <n-space :justify="currentStep == 1 ? 'end' : 'space-between'">
             <n-button @click="prev" v-if="currentStep !== 1">Previous</n-button>
             <n-button v-if="currentStep !== 3" @click="next">Next</n-button>
-            <n-button v-else @click="finish">Finish</n-button>
+            <n-button type="primary" v-else @click="finish">Finish</n-button>
           </n-space>
         </n-card>
       </div>

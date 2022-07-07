@@ -24,6 +24,8 @@ import {
   NLoadingBarProvider,
   NMessageProvider,
   NNotificationProvider,
+  useLoadingBar,
+  createDiscreteApi,
 } from "naive-ui";
 import {
   BookOutline as BookIcon,
@@ -31,8 +33,15 @@ import {
   WineOutline as WineIcon,
   HomeOutline as HomeIcon,
 } from "@vicons/ionicons5";
-import { onMounted } from "vue";
+import { onMounted} from "vue";
 import { useCommonStore } from "./stores/common";
+import router from "./router";
+import AppProvider from "./app.provider.vue";
+
+const { loadingBar } = createDiscreteApi([
+  "loadingBar",
+]);
+
 export default {
   components: {
     HelloWorld,
@@ -54,18 +63,28 @@ export default {
     NLoadingBarProvider,
     NMessageProvider,
     NNotificationProvider,
+    AppProvider,
   },
 
   setup() {
     const route = useRoute();
     const path = computed(() => route.path);
-
     const common = useCommonStore();
     const { isLoading } = storeToRefs(common);
 
     const theme = ref(null);
+    router.beforeEach(function (to, from, next) {
+      if (!from || to.path !== from.path) {
+        loadingBar.start();
+      }
+      next();
+    });
+    router.afterEach((to, from, failture) => {
+      loadingBar.finish()
+    })
 
     const isDarkTheme = ref(false);
+
 
     onMounted(() => {
       common.setTheme(localStorage.getItem("theme"));
@@ -224,74 +243,69 @@ export default {
 
 <template>
   <n-config-provider :theme="theme" :theme-overrides="themeOverrides">
-    <n-message-provider>
-      <n-notification-provider>
-        <n-layout id="layout" has-sider>
-          <n-layout-sider
-            bordered
-            :collapsed-width="0"
-            collapse-mode="width"
-            :collapsed="collapsed"
-            @collapse="collapsed = true"
-            @expand="collapsed = false"
-            show-trigger="arrow-circle"
-            trigger-style="top: 50%;"
-            collapsed-trigger-style="top: 50%; left: -10%;"
-            v-if="showSider && !common.disableSidebar.includes(path)"
+    <app-provider>
+      <n-layout id="layout" has-sider>
+        <n-layout-sider
+          bordered
+          :collapsed-width="0"
+          collapse-mode="width"
+          :collapsed="collapsed"
+          @collapse="collapsed = true"
+          @expand="collapsed = false"
+          show-trigger="arrow-circle"
+          trigger-style="top: 50%;"
+          collapsed-trigger-style="top: 50%; left: -10%;"
+          v-if="showSider && !common.disableSidebar.includes(path)"
+        >
+          <n-menu :options="menuOptions" />
+        </n-layout-sider>
+        <n-layout>
+          <n-layout-header
+            v-if="!common.disableHeader.includes(path) && path !== '/'"
+            id="navbar"
+            :position="'fixed'"
+            :bordered="true"
           >
-            <n-menu :options="menuOptions" />
-          </n-layout-sider>
-          <n-layout>
-            <n-layout-header
-              v-if="!common.disableHeader.includes(path) && path !== '/'"
-              id="navbar"
-              :position="'fixed'"
-              :bordered="true"
-            >
-              <n-switch
-                v-model:value="isDarkTheme"
-                @update:value="handleChange"
-              />
-            </n-layout-header>
-            <n-scrollbar
-              v-if="path !== '/'"
-              @scroll="onScroll"
-              trigger="hover"
-              style="max-height: 100vh"
-            >
-              <n-loading-bar-provider>
-                <n-layout-content @on-scroll="onScroll">
-                  <RouterView />
-                </n-layout-content>
-              </n-loading-bar-provider>
-            </n-scrollbar>
-            <n-layout-header
-              v-if="path == '/'"
-              id="navbar"
-              :position="'fixed'"
-              :bordered="true"
-            >
-              <n-switch
-                v-model:value="isDarkTheme"
-                @update:value="handleChange"
-              />
-            </n-layout-header>
+            <n-switch
+              v-model:value="isDarkTheme"
+              @update:value="handleChange"
+            />
+          </n-layout-header>
+          <n-scrollbar
+            v-if="path !== '/'"
+            @scroll="onScroll"
+            trigger="hover"
+            style="max-height: 100vh"
+          >
+            <n-layout-content @on-scroll="onScroll">
+              <RouterView />
+            </n-layout-content>
+          </n-scrollbar>
+          <n-layout-header
+            v-if="path == '/'"
+            id="navbar"
+            :position="'fixed'"
+            :bordered="true"
+          >
+            <n-switch
+              v-model:value="isDarkTheme"
+              @update:value="handleChange"
+            />
+          </n-layout-header>
 
-            <n-loading-bar-provider v-if="path == '/'">
-              <n-layout-content v-if="path == '/'" @on-scroll="onScroll">
-                <RouterView />
-              </n-layout-content>
-            </n-loading-bar-provider>
-            <n-layout-footer v-if="path == '/'">
-              Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eos
-              debitis expedita esse saepe quod officia deleniti minus aliquid
-              tempore, maxime dolore cupiditate eaque tempora quidem at nemo, >
-            </n-layout-footer>
-          </n-layout>
+          <n-layout-content v-if="path == '/'" @on-scroll="onScroll">
+            <RouterView />
+          </n-layout-content>
+          <n-layout-footer v-if="path == '/'">
+            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eos
+            debitis expedita esse saepe quod officia deleniti minus aliquid
+            tempore, maxime dolore cupiditate eaque tempora quidem at nemo, >
+          </n-layout-footer>
         </n-layout>
-        <n-global-style />
-      </n-notification-provider>
-    </n-message-provider>
+      </n-layout>
+
+      <n-global-style />
+    </app-provider>
   </n-config-provider>
 </template>
 
