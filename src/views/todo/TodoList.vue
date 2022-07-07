@@ -12,6 +12,8 @@ import {
 } from "naive-ui";
 import { VuemojiPicker} from 'vuemoji-picker'
 import { EllipsisHorizontalCircle } from "@vicons/ionicons5";
+import { useTodoStore } from "../../stores/todo";
+
 export default {
   components: {
     NPageHeader,
@@ -27,8 +29,10 @@ export default {
   },
   setup() {
     const emoji = ref(null)
+    const todo = useTodoStore()
     return {
       emoji,
+      todo,
       handleBack() {},
       handleEmojiClick(em) {
         emoji.value = em.unicode
@@ -54,7 +58,7 @@ export default {
       </template>
       <template #extra>
         <n-space>
-          <n-dropdown>
+          <n-dropdown trigger="click" :options="todo.todoListOptions">
             <n-button text style="font-size: 1.5rem;">
               <n-icon>
                 <ellipsis-horizontal-circle />
@@ -66,7 +70,7 @@ export default {
     </n-page-header>
     <n-divider />
     <div class="todolist">
-      <VuemojiPicker @emojiClick="handleEmojiClick" />
+      <VuemojiPicker :isDark="true" @emojiClick="handleEmojiClick" />
       <h1>Lorem ipsum dolor sit amet.</h1>
       <h1>Lorem ipsum dolor sit amet.</h1>
       <h1>Lorem ipsum dolor sit amet.</h1>
