@@ -103,6 +103,7 @@ export default {
         primaryColor: "#E28163FF",
         primaryColorHover: "#E28163FF",
         primaryColorPressed: "#E28163FF",
+        invertedColor: "#A08278FF"
       },
     };
 
@@ -247,14 +248,12 @@ export default {
       <n-layout id="layout" has-sider>
         <n-layout-sider
           bordered
-          :collapsed-width="0"
           collapse-mode="width"
+          :collapsed-width="0"
           :collapsed="collapsed"
           @collapse="collapsed = true"
           @expand="collapsed = false"
-          show-trigger="arrow-circle"
-          trigger-style="top: 50%;"
-          collapsed-trigger-style="top: 50%; left: -10%;"
+          show-trigger="bar"
           v-if="showSider && !common.disableSidebar.includes(path)"
         >
           <n-menu :options="menuOptions" />
@@ -321,9 +320,12 @@ export default {
 }
 #app {
   font-family: "Josefin Sans";
+  overflow-y: hidden;
 }
-.n-layout-sider {
-  position: fixed;
-  height: 100%;
+.n-layout .n-layout-scroll-container {
+  overflow-y: hidden;
+}
+.n-layout-content {
+  min-height: 100vh;
 }
 </style>

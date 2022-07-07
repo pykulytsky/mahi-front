@@ -35,7 +35,7 @@ export default {
 <template>
   <main>
     <div class="svgs">
-      <scroll-parallax direction="x" :left="true" :speed="0.15">
+      <scroll-parallax direction="y" :speed="0.3">
         <svg
           version="1.1"
           xmlns="http://www.w3.org/2000/svg"
@@ -63,7 +63,7 @@ export default {
         </svg>
       </scroll-parallax>
 
-      <scroll-parallax direction="x" :left="true" :speed="0.6">
+      <scroll-parallax direction="y" :speed="0.1">
         <svg
           version="1.1"
           xmlns="http://www.w3.org/2000/svg"
