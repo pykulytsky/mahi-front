@@ -13,7 +13,7 @@ import {
 import { VuemojiPicker} from 'vuemoji-picker'
 import { EllipsisHorizontalCircle } from "@vicons/ionicons5";
 import { useTodoStore } from "../../stores/todo";
-
+import TodoItem from "../../components/todo/TodoItem.vue";
 export default {
   components: {
     NPageHeader,
@@ -25,7 +25,8 @@ export default {
     NButton,
     NIcon,
     EllipsisHorizontalCircle,
-    NSpace
+    NSpace,
+    TodoItem
   },
   setup() {
     const emoji = ref(null)
@@ -70,32 +71,26 @@ export default {
     </n-page-header>
     <n-divider />
     <div class="todolist">
-      <VuemojiPicker :isDark="true" @emojiClick="handleEmojiClick" />
-      <h1>Lorem ipsum dolor sit amet.</h1>
-      <h1>Lorem ipsum dolor sit amet.</h1>
-      <h1>Lorem ipsum dolor sit amet.</h1>
-      <h1>Lorem ipsum dolor sit amet.</h1>
-      <h1>Lorem ipsum dolor sit amet.</h1>
-      <h1>Lorem ipsum dolor sit amet.</h1>
-      <h1>Lorem ipsum dolor sit amet.</h1>
-      <h1>Lorem ipsum dolor sit amet.</h1>
-      <h1>Lorem ipsum dolor sit amet.</h1>
-      <h1>Lorem ipsum dolor sit amet.</h1>
-      <h1>Lorem ipsum dolor sit amet.</h1>
-      <h1>Lorem ipsum dolor sit amet.</h1>
-      <h1>Lorem ipsum dolor sit amet.</h1>
-      <h1>Lorem ipsum dolor sit amet.</h1>
-      <h1>Lorem ipsum dolor sit amet.</h1>
-      <h1>Lorem ipsum dolor sit amet.</h1>
-      <h1>Lorem ipsum dolor sit amet.</h1>
-      <h1>Lorem ipsum dolor sit amet.</h1>
-      <h1>Lorem ipsum dolor sit amet.</h1>
+      <todo-item></todo-item>
+      <todo-item></todo-item>
+      <todo-item></todo-item>
+      <todo-item></todo-item>
+      <todo-item></todo-item>
+      <todo-item></todo-item>
+      <todo-item></todo-item>
+      <todo-item></todo-item>
+      <todo-item></todo-item>
+      <todo-item></todo-item>
     </div>
   </main>
 </template>
 <style>
 .todolist {
-  margin-bottom: 35px;
+  margin-bottom: 55px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 .n-page-header .n-page-header__avatar {
   font-size: 3rem;

@@ -64,6 +64,7 @@ export default {
     NMessageProvider,
     NNotificationProvider,
     AppProvider,
+    RouterView
   },
 
   setup() {
