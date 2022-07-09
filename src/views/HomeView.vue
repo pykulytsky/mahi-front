@@ -5,24 +5,41 @@ import Todo2 from "../assets/lottie/todo2.json";
 import Todo3 from "../assets/lottie/todo3.json";
 import Brain from "../assets/lottie/brain.json";
 import Time1 from "../assets/lottie/time1.json";
-import {onMounted, onUnmounted} from "vue";
+import { onMounted, onUnmounted } from "vue";
+import VVanta from "vue-vanta/src/Vanta.vue";
 export default {
   components: {
     NGradientText,
+    VVanta,
   },
   setup() {
     onMounted(() => {
-      document.documentElement.style.overflow = 'auto'
-    })
+      document.documentElement.style.overflow = "auto";
+    });
     onUnmounted(() => {
-      document.documentElement.style.overflow = 'hidden'
-    })
+      document.documentElement.style.overflow = "hidden";
+    });
+    const vantaOptions = {
+      mouseControls: true,
+      touchControls: true,
+      minHeight: 750.0,
+      minWidth: 200.0,
+      scale: 1.0,
+      scaleMobile: 1.0,
+      blurFactor: 0.73,
+      highlightColor: 0x965a04,
+      midtoneColor: 0xca832e,
+      lowlightColor: 0x7f3811,
+      speed: 2.0,
+      zoom: 1.1,
+    };
     return {
       Todo1,
       Todo2,
       Todo3,
       Brain,
       Time1,
+      vantaOptions,
       viewHandler(state) {},
       visibilityChanged(isVisible, entry) {
         this.isVisible = isVisible;
@@ -34,7 +51,9 @@ export default {
 
 <template>
   <main>
-    <div class="svgs">
+    <div class="svgs" id="svgs">
+      <!-- <v-vanta effect="fog" :options="vantaOptions"> -->
+
       <scroll-parallax direction="y" :speed="0.3">
         <svg
           version="1.1"
@@ -121,6 +140,7 @@ export default {
           ></animate>
         </path>
       </svg>
+      <!-- </v-vanta> -->
     </div>
     <div class="header">
       <h1 class="header-caption">
@@ -241,7 +261,7 @@ export default {
 }
 #blob1 {
   position: absolute;
-  top: 0%;
+  top: 50%;
   right: 0%;
 }
 #blob2 {

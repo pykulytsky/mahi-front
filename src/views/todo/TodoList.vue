@@ -1,5 +1,5 @@
 <script>
-import {ref} from "vue"
+import { ref } from "vue";
 import {
   NPageHeader,
   NBreadcrumb,
@@ -8,12 +8,20 @@ import {
   NDropdown,
   NButton,
   NIcon,
-  NSpace
+  NSpace,
+  NDrawer,
+  NDrawerContent,
+  NTooltip,
+
 } from "naive-ui";
-import { VuemojiPicker} from 'vuemoji-picker'
-import { EllipsisHorizontalCircle } from "@vicons/ionicons5";
+import { VuemojiPicker } from "vuemoji-picker";
+import { EllipsisHorizontalCircle, Star, StarOutline } from "@vicons/ionicons5";
 import { useTodoStore } from "../../stores/todo";
 import TodoItem from "../../components/todo/TodoItem.vue";
+import Empty1 from "../../assets/lottie/empty1.json"
+import Empty2 from "../../assets/lottie/empty2.json"
+import Empty3 from "../../assets/lottie/empty3.json"
+import draggable from 'vuedraggable'
 export default {
   components: {
     NPageHeader,
@@ -26,17 +34,80 @@ export default {
     NIcon,
     EllipsisHorizontalCircle,
     NSpace,
-    TodoItem
+    TodoItem,
+    NDrawer,
+    NDrawerContent,
+    Star,
+    StarOutline,
+    NTooltip,
+    draggable,
+
   },
   setup() {
-    const emoji = ref(null)
-    const todo = useTodoStore()
+    const emoji = ref(null);
+    const todo = useTodoStore();
+    const todoDetailIsShown = ref(false);
+    const placement = ref("right");
+    const isFavorite = ref(false);
+    const activate = (place) => {
+      todoDetailIsShown.value = true;
+      placement.value = place;
+    };
+    const todos = ref([
+      {
+        id: 1,
+        title: "Stoner is a 1965 novel by the American writer John Williams.",
+        description: 'Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots.',
+        isDone: true
+      },
+      {
+        id: 2,
+        title: "Stoner is a 19r John Williams.",
+        description: 'Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots.',
+        isDone: false
+      },
+      {
+        id: 3,
+        title: "Stoner iams.",
+        description: 'Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots.',
+        isDone: true
+      },
+      {
+        id: 4,
+        title: "Stoner is a 1965 novel by the American writer John Williams. Stoner is a 1965 novel by the American writer John Williams.",
+        description: 'Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots.',
+        isDone: false
+      },
+      {
+        id: 5,
+        title: "Stoner is a 1965 novel by the American writer John Williams.",
+        description: 'Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots.',
+        isDone: false
+      },
+      {
+        id: 6,
+        title: "1965 American writer John Williams.",
+        description: 'Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots.',
+        isDone: false
+      },
+    ])
     return {
       emoji,
       todo,
+      todoDetailIsShown,
+      placement,
+      activate,
+      Empty1,
+      Empty2,
+      Empty3,
+      todos,
+      isFavorite,
       handleBack() {},
       handleEmojiClick(em) {
-        emoji.value = em.unicode
+        emoji.value = em.unicode;
+      },
+      showTodoDetails() {
+        todoDetailIsShown.value = true;
       },
     };
   },
@@ -46,7 +117,7 @@ export default {
   <main>
     <n-page-header @back="handleBack">
       <template #title>
-        <h1 class="todolist-title">Lorem ipsum dolor sit.</h1>
+        <h1 id="todolist-title">Lorem ipsum dolor sit.</h1>
       </template>
       <template #header>
         <n-breadcrumb>
@@ -55,12 +126,28 @@ export default {
         </n-breadcrumb>
       </template>
       <template #avatar>
-        {{emoji}}
+        {{ emoji }}
       </template>
       <template #extra>
         <n-space>
+          <n-tooltip>
+            <template #trigger>
+              <n-button
+                @click="isFavorite = !isFavorite"
+                text
+                style="font-size: 1.3rem"
+              >
+                <n-icon>
+                  <star-outline v-if="!isFavorite" />
+                  <star v-else />
+                </n-icon>
+              </n-button>
+            </template>
+            <p v-if="isFavorite">Remove from favorites</p>
+            <p v-else>Add to favorites</p>
+          </n-tooltip>
           <n-dropdown trigger="click" :options="todo.todoListOptions">
-            <n-button text style="font-size: 1.5rem;">
+            <n-button text style="font-size: 1.5rem">
               <n-icon>
                 <ellipsis-horizontal-circle />
               </n-icon>
@@ -71,17 +158,33 @@ export default {
     </n-page-header>
     <n-divider />
     <div class="todolist">
-      <todo-item></todo-item>
-      <todo-item></todo-item>
-      <todo-item></todo-item>
-      <todo-item></todo-item>
-      <todo-item></todo-item>
-      <todo-item></todo-item>
-      <todo-item></todo-item>
-      <todo-item></todo-item>
-      <todo-item></todo-item>
-      <todo-item></todo-item>
+      <todo-item
+        v-for="todo in todos"
+        @show-todo-details="showTodoDetails"
+        :todo="todo"
+        v-motion-pop
+        :delay="todo.id * 100"
+        :key="todo.id"
+      ></todo-item>
+
+      <Vue3Lottie
+        id="todolist-no-data"
+        :animationData="Empty2"
+        :width="500"
+        :height="500"
+      />
     </div>
+    <n-drawer
+      v-model:show="todoDetailIsShown"
+      :width="752"
+      :placement="placement"
+      to="body"
+      :height="100"
+    >
+      <n-drawer-content title="Stoner">
+        Stoner is a 1965 novel by the American writer John Williams.
+      </n-drawer-content>
+    </n-drawer>
   </main>
 </template>
 <style>
@@ -97,5 +200,11 @@ export default {
 }
 .n-page-header-wrapper {
   padding: 2% 5%;
+}
+#todolist-title {
+  font-weight: bold;
+}
+.n-drawer.n-drawer--right-placement {
+  height: 100vh;
 }
 </style>

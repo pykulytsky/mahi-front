@@ -329,4 +329,7 @@ export default {
 .n-layout-content {
   min-height: 100vh;
 }
+::selection {
+  background: #E28163FF;
+}
 </style>
