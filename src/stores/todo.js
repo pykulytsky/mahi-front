@@ -8,7 +8,7 @@ import {
   ArchiveOutline,
   GridOutline,
   HappyOutline,
-  ContrastOutline
+  ContrastOutline,
 } from "@vicons/ionicons5";
 
 const renderIcon = (icon) => {
@@ -22,6 +22,7 @@ const renderIcon = (icon) => {
 export const useTodoStore = defineStore({
   id: "todo",
   state: () => ({
+    _pinned: [],
     _todoListOptions: [
       {
         label: "Edit",
@@ -39,6 +40,10 @@ export const useTodoStore = defineStore({
         icon: renderIcon(ArchiveOutline),
       },
       {
+        type: "divider",
+        key: "d1",
+      },
+      {
         label: "Display settings",
         key: 4,
         icon: renderIcon(GridOutline),
@@ -54,6 +59,10 @@ export const useTodoStore = defineStore({
         icon: renderIcon(ContrastOutline),
       },
       {
+        type: "divider",
+        key: "d2",
+      },
+      {
         label: "Delete",
         key: 7,
         icon: renderIcon(TrashOutline),
@@ -62,5 +71,11 @@ export const useTodoStore = defineStore({
   }),
   getters: {
     todoListOptions: (state) => state._todoListOptions,
+    pinned: (state) => state._pinned
   },
+  actions: {
+    setPinned(pinnedList) {
+      this._pinned = pinnedList
+    }
+  }
 });

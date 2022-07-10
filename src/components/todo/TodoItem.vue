@@ -8,6 +8,7 @@ import {
   NCollapse,
   NCollapseItem,
   NCollapseTransition,
+  NCheckbox
 } from "naive-ui";
 import { EllipsisVerticalOutline } from "@vicons/ionicons5";
 import { useCommonStore } from "../../stores/common";
@@ -27,6 +28,7 @@ export default {
     NCollapse,
     NCollapseItem,
     NCollapseTransition,
+    NCheckbox
   },
   emits: ["showTodoDetails"],
   props: {
@@ -61,10 +63,10 @@ export default {
     @contextmenu.prevent="$emit('showTodoDetails')"
   >
     <div class="todo-item-title">
-      <n-radio size="large">
+      <n-checkbox size="large">
         <h2 v-if="mq.lgPlus">{{ todo.title }}</h2>
         <h4 v-else>{{ todo.title }}</h4>
-      </n-radio>
+      </n-checkbox>
       <Transition>
         <div class="todo-item-actions" v-if="todoActionsIsShown">
           <n-dropdown trigger="click" :options="todoActions">
@@ -136,5 +138,8 @@ export default {
   display: flex;
   justify-content: space-between;
   width: 100%;
+}
+.todo-item-title .n-checkbox-box {
+  border-radius: 50%;
 }
 </style>

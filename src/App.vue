@@ -89,6 +89,12 @@ export default {
 
     onMounted(() => {
       common.setTheme(localStorage.getItem("theme"));
+      const sider = localStorage.getItem("siderIsShown")
+      if(sider) {
+        if (sider == "true") {
+          common.setSiderVisability(true)
+        }
+      }
       if (common.currentTheme == "dark") {
         theme.value = darkTheme;
         isDarkTheme.value = true;
@@ -251,9 +257,9 @@ export default {
           bordered
           collapse-mode="width"
           :collapsed-width="0"
-          :collapsed="collapsed"
-          @collapse="collapsed = true"
-          @expand="collapsed = false"
+          :collapsed="common.siderIsExpanded"
+          @collapse="common.setSiderVisability(true)"
+          @expand="common.setSiderVisability(false)"
           show-trigger="bar"
           v-if="showSider && !common.disableSidebar.includes(path)"
         >

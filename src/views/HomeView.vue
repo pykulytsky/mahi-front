@@ -7,6 +7,7 @@ import Brain from "../assets/lottie/brain.json";
 import Time1 from "../assets/lottie/time1.json";
 import { onMounted, onUnmounted } from "vue";
 import VVanta from "vue-vanta/src/Vanta.vue";
+import { ref } from "vue";
 export default {
   components: {
     NGradientText,
@@ -33,16 +34,18 @@ export default {
       speed: 2.0,
       zoom: 1.1,
     };
+    const featuresIsVisible = ref(false);
     return {
       Todo1,
       Todo2,
       Todo3,
       Brain,
       Time1,
+      featuresIsVisible,
       vantaOptions,
       viewHandler(state) {},
       visibilityChanged(isVisible, entry) {
-        this.isVisible = isVisible;
+        featuresIsVisible.value = !isVisible;
       },
     };
   },
@@ -143,7 +146,7 @@ export default {
       <!-- </v-vanta> -->
     </div>
     <div class="header">
-      <h1 class="header-caption">
+      <h1 class="header-caption" v-observe-visibility="visibilityChanged">
         Lorem
         <n-gradient-text
           :gradient="{
@@ -157,59 +160,75 @@ export default {
       </h1>
     </div>
     <div class="features">
-      <scroll-parallax
-        direction="x"
-        :left="true"
-        :speed="0.15"
+      <div
         class="feature-item"
+        v-motion
+        :initial="{
+          opacity: 0,
+          y: 100,
+        }"
+        :visibleOnce="{
+          opacity: 1,
+          y: 0,
+        }"
       >
-        <div v-element-visibility="viewHandler">
-          <h3>Lorem, ipsum dolor.</h3>
-          <h3>Lorem, ipsum dolor.</h3>
-          <h3>Lorem, ipsum dolor.</h3>
-          <Vue3Lottie
-            id="lottie1"
-            :animationData="Time1"
-            :width="200"
-            :height="200"
-          />
-        </div>
-      </scroll-parallax>
+        <h3>Lorem, ipsum dolor.</h3>
+        <h3>Lorem, ipsum dolor.</h3>
+        <h3>Lorem, ipsum dolor.</h3>
+        <Vue3Lottie
+          id="lottie1"
+          :animationData="Time1"
+          :width="200"
+          :height="200"
+        />
+      </div>
 
-      <scroll-parallax direction="y" :speed="0.2" class="feature-item">
-        <div>
-          <h3>Lorem, ipsum dolor.</h3>
-          <h3>Lorem, ipsum dolor.</h3>
-          <h3>Lorem, ipsum dolor.</h3>
-
-          <Vue3Lottie
-            id="lottie2"
-            :animationData="Brain"
-            :width="200"
-            :height="150"
-          />
-        </div>
-      </scroll-parallax>
-      <scroll-parallax
-        direction="x"
-        :right="true"
-        :speed="0.15"
-        :left="false"
+      <div
         class="feature-item"
+        v-motion
+        :initial="{
+          opacity: 0,
+          y: 200,
+        }"
+        :visibleOnce="{
+          opacity: 1,
+          y: 0,
+        }"
       >
-        <div>
-          <h3>Lorem, ipsum dolor.</h3>
-          <h3>Lorem, ipsum dolor.</h3>
-          <h3>Lorem, ipsum dolor.</h3>
+        <h3>Lorem, ipsum dolor.</h3>
+        <h3>Lorem, ipsum dolor.</h3>
+        <h3>Lorem, ipsum dolor.</h3>
 
-          <Vue3Lottie
-            id="lottie3"
-            :animationData="Todo3"
-            :width="200"
-            :height="200"
-          />
-        </div>
-      </scroll-parallax>
+        <Vue3Lottie
+          id="lottie2"
+          :animationData="Brain"
+          :width="200"
+          :height="150"
+        />
+      </div>
+
+      <div class="feature-item"
+        v-motion
+        :initial="{
+          opacity: 0,
+          y: 300,
+        }"
+        :visibleOnce="{
+          opacity: 1,
+          y: 0,
+        }"
+      >
+        <h3>Lorem, ipsum dolor.</h3>
+        <h3>Lorem, ipsum dolor.</h3>
+        <h3>Lorem, ipsum dolor.</h3>
+
+        <Vue3Lottie
+          id="lottie3"
+          :animationData="Todo3"
+          :width="200"
+          :height="200"
+        />
+      </div>
     </div>
     <h1>
       Lorem ipsum dolor sit amet consectetur adipisicing elit. Vitae nobis odio
@@ -219,7 +238,7 @@ export default {
       Fuga veniam fugiat beatae facilis dolorem delectus omnis ullam iusto
       accusamus repellat nihil, maiores distinctio molestiae eaque.
     </h1>
-    <h1 v-observe-visibility="visibilityChanged">
+    <h1>
       Lorem ipsum dolor sit amet consectetur adipisicing elit. Vitae nobis odio
       facere ducimus numquam nemo autem voluptatum velit dicta suscipit
       assumenda, ullam error fugit temporibus illum ex molestiae animi adipisci
