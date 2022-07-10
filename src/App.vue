@@ -26,12 +26,19 @@ import {
   NNotificationProvider,
   useLoadingBar,
   createDiscreteApi,
+  NSpace,
+  NAvatar,
 } from "naive-ui";
 import {
   BookOutline as BookIcon,
   PersonOutline as PersonIcon,
   WineOutline as WineIcon,
   HomeOutline as HomeIcon,
+  MenuOutline,
+  Menu,
+  SearchOutline,
+  NotificationsOutline
+
 } from "@vicons/ionicons5";
 import { onMounted} from "vue";
 import { useCommonStore } from "./stores/common";
@@ -64,7 +71,13 @@ export default {
     NMessageProvider,
     NNotificationProvider,
     AppProvider,
-    RouterView
+    RouterView,
+    HomeIcon,
+    menuFilled: Menu,
+    MenuOutline,
+    NSpace,
+    NotificationsOutline,
+    NAvatar
   },
 
   setup() {
@@ -85,7 +98,6 @@ export default {
     })
 
     const isDarkTheme = ref(false);
-
 
     onMounted(() => {
       common.setTheme(localStorage.getItem("theme"));
@@ -121,10 +133,7 @@ export default {
             RouterLink,
             {
               to: {
-                name: "home",
-                params: {
-                  lang: "en-US",
-                },
+                name: "about",
               },
             },
             { default: () => "Going Home" }
@@ -234,6 +243,7 @@ export default {
       collapsed: ref(true),
       showSider: ref(true),
       isDarkTheme,
+      SearchOutline,
       handleChange(value) {
         if (value) {
           theme.value = darkTheme;
@@ -260,7 +270,6 @@ export default {
           :collapsed="common.siderIsExpanded"
           @collapse="common.setSiderVisability(true)"
           @expand="common.setSiderVisability(false)"
-          show-trigger="bar"
           v-if="showSider && !common.disableSidebar.includes(path)"
         >
           <n-menu :options="menuOptions" />
@@ -272,10 +281,43 @@ export default {
             :position="'fixed'"
             :bordered="true"
           >
-            <n-switch
-              v-model:value="isDarkTheme"
-              @update:value="handleChange"
-            />
+          <div id="home-navbar-menu">
+            <n-button
+              text
+              style="font-size: 1.5rem"
+            >
+              <n-icon>
+                <menu-filled @click="common.setSiderVisability(!common.siderIsExpanded)" />
+              </n-icon>
+            </n-button>
+            <n-button
+              text
+              style="font-size: 1.3rem"
+            >
+              <n-icon>
+                <home-icon />
+              </n-icon>
+            </n-button>
+          </div>
+          <div id="navbar-right">
+          <n-auto-complete>
+            <template #prefix>
+              <n-icon :component="SearchOutline" />
+            </template>
+          </n-auto-complete>
+            <n-button
+              text
+              style="font-size: 1.5rem;margin-right: 15px;"
+            >
+              <n-icon>
+                <notifications-outline />
+              </n-icon>
+            </n-button>
+            <n-avatar id="navbar-avatar" round size="small">
+              U
+            </n-avatar>
+          </div>
+
           </n-layout-header>
           <n-scrollbar
             v-if="path !== '/'"
@@ -284,7 +326,11 @@ export default {
             style="max-height: 100vh"
           >
             <n-layout-content @on-scroll="onScroll">
-              <RouterView />
+              <RouterView v-slot="{ Component }">
+                <Transition name="fade">
+                  <component :is="Component" />
+                </Transition>
+              </RouterView>
             </n-layout-content>
           </n-scrollbar>
           <n-layout-header
@@ -300,7 +346,11 @@ export default {
           </n-layout-header>
 
           <n-layout-content v-if="path == '/'" @on-scroll="onScroll">
-            <RouterView />
+              <RouterView v-slot="{ Component }">
+                <Transition name="fade">
+                  <component :is="Component" />
+                </Transition>
+              </RouterView>
           </n-layout-content>
           <n-layout-footer v-if="path == '/'">
             Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eos
@@ -337,5 +387,40 @@ export default {
 }
 ::selection {
   background: #E28163FF;
+}
+#home-navbar-menu {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: 5%;
+}
+#navbar .n-auto-complete {
+  height: 75%;
+  margin-right: 15px;
+}
+#navbar-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+}
+#navbar-avatar {
+  width: 50px;
+  height: 34px;
+}
+#navbar-avatar:hover {
+  cursor: pointer;
+}
+#navbar-avatar .n-avatar__text {
+  top: 55%;
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

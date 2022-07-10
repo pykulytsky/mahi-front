@@ -1,5 +1,14 @@
 import { defineStore } from 'pinia'
+import { h } from "vue";
+import { NIcon } from "naive-ui";
 
+const renderIcon = (icon) => {
+  return () => {
+    return h(NIcon, null, {
+      default: () => h(icon),
+    });
+  };
+}
 export const useCommonStore = defineStore({
   id: 'common',
   state: () => ({
@@ -9,7 +18,10 @@ export const useCommonStore = defineStore({
     _currentTheme: null,
     _disableHeader: ['/login', '/register', '/reset-password'],
     _disableSidebar: ['/', '/login', '/register', '/reset-password'],
-    _disableFooter: ['']
+    _disableFooter: [''],
+    _menuItems: [
+
+    ]
   }),
   getters: {
     isLoading: (state) => state._isLoading,
