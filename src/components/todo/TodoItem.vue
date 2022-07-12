@@ -5,10 +5,11 @@ import {
   NDropdown,
   NButton,
   NIcon,
-  NCollapse,
-  NCollapseItem,
+  NEllipsis,
   NCollapseTransition,
-  NCheckbox
+  NCheckbox,
+  NTag,
+  NSpace
 } from "naive-ui";
 import { EllipsisVerticalOutline } from "@vicons/ionicons5";
 import { useCommonStore } from "../../stores/common";
@@ -22,13 +23,11 @@ export default {
     NButton,
     NIcon,
     EllipsisVerticalOutline,
-    NCollapse,
-    NCollapseItem,
     NCollapseTransition,
-    NCollapse,
-    NCollapseItem,
-    NCollapseTransition,
-    NCheckbox
+    NCheckbox,
+    NEllipsis,
+    NTag,
+    NSpace
   },
   emits: ["showTodoDetails"],
   props: {
@@ -64,7 +63,7 @@ export default {
   >
     <div class="todo-item-title">
       <n-checkbox size="large">
-        <h2 v-if="mq.lgPlus">{{ todo.title }}</h2>
+        <h3 v-if="mq.lgPlus">{{ todo.title }}</h3>
         <h4 v-else>{{ todo.title }}</h4>
       </n-checkbox>
       <Transition>
@@ -79,11 +78,24 @@ export default {
         </div>
       </Transition>
     </div>
-    <n-collapse>
+    <n-ellipsis id="description" expand-trigger="click" line-clamp="1" :tooltip="false">
+      {{todo.description}}
+    </n-ellipsis>
+    <n-space id="todo-tags">
+      <n-tag
+        size="small"
+        v-for="tag in todo.tags"
+        :key="tag.title"
+        :type="tag.type"
+      >
+        {{tag.title}}
+      </n-tag>
+    </n-space>
+    <!-- <n-collapse>
       <n-collapse-item title="Description">
         {{todo.description}}
       </n-collapse-item>
-    </n-collapse>
+    </n-collapse> -->
   </div>
 </template>
 
@@ -94,7 +106,7 @@ export default {
   flex-direction: column;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 2% 2% 1% 5%;
+  padding: 1% 2% .5% 2%;
   width: 75vw;
   background-color: #dfcabd;
   margin: 5px;
@@ -107,7 +119,7 @@ export default {
   align-items: flex-start;
   justify-content: space-between;
   flex-direction: column;
-  padding: 2% 2% 1% 5%;
+  padding: 1% 2% .5% 2%;
   width: 75vw;
   margin: 5px;
   border: 1px solid rgba(128, 128, 128, 0.2);
@@ -141,5 +153,14 @@ export default {
 }
 .todo-item-title .n-checkbox-box {
   border-radius: 50%;
+}
+#description {
+  padding: 0% 3%;
+}
+.todo-item-title .n-checkbox .n-checkbox-box-wrapper {
+  height: 60%;
+}
+#todo-tags {
+  padding-left: 4%;
 }
 </style>

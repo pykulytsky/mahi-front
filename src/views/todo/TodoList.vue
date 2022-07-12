@@ -12,7 +12,7 @@ import {
   NDrawer,
   NDrawerContent,
   NTooltip,
-  NModal
+  NModal,
 } from "naive-ui";
 import { VuemojiPicker } from "vuemoji-picker";
 import { EllipsisHorizontalCircle, Star, StarOutline } from "@vicons/ionicons5";
@@ -24,6 +24,7 @@ import Empty1 from "../../assets/lottie/empty1.json";
 import Empty2 from "../../assets/lottie/empty2.json";
 import Empty3 from "../../assets/lottie/empty3.json";
 import draggable from "vuedraggable";
+import TodoCreateForm from "../../components/todo/TodoCreateForm.vue"
 export default {
   components: {
     NPageHeader,
@@ -45,7 +46,8 @@ export default {
     draggable,
     Pin,
     PinnedOff,
-    NModal
+    NModal,
+    TodoCreateForm
   },
   setup() {
     const emoji = ref(null);
@@ -65,15 +67,34 @@ export default {
         id: 1,
         title: "Stoner is a 1965 novel by the American writer John Williams.",
         description:
-          'Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots.',
+          'Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots. Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots. Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots.',
         isDone: true,
+        tags: [
+          {
+            type: 'error',
+            title: 'important'
+          },
+          {
+            type: 'info',
+            title: 'grocery'
+          },
+          {
+            type: 'success',
+            title: 'sport'
+          },
+        ]
       },
       {
         id: 2,
         title: "Stoner is a 19r John Williams.",
-        description:
-          'Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots.',
+        description: '',
         isDone: false,
+        tags: [
+          {
+            type: 'error',
+            title: 'important'
+          },
+        ]
       },
       {
         id: 3,
@@ -81,6 +102,7 @@ export default {
         description:
           'Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots.',
         isDone: true,
+        tags: []
       },
       {
         id: 4,
@@ -89,6 +111,16 @@ export default {
         description:
           'Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots.',
         isDone: false,
+        tags: [
+          {
+            type: 'warning',
+            title: 'Kate'
+          },
+          {
+            type: 'error',
+            title: 'vacation'
+          },
+        ]
       },
       {
         id: 5,
@@ -96,6 +128,7 @@ export default {
         description:
           'Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots.',
         isDone: false,
+        tags: []
       },
       {
         id: 6,
@@ -103,6 +136,7 @@ export default {
         description:
           'Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots.',
         isDone: false,
+        tags: []
       },
     ]);
     return {
@@ -144,6 +178,20 @@ export default {
           case 7:
             break;
         }
+      },
+      addItem() {
+        todos.value.push({
+                  id: 7,
+        title: "Stoner is a 19r John Williams.",
+        description: '',
+        isDone: false,
+        tags: [
+          {
+            type: 'error',
+            title: 'important'
+          },
+        ]
+        })
       }
     };
   },
@@ -211,6 +259,7 @@ export default {
     </n-page-header>
     <n-divider />
     <div class="todolist">
+      <todo-create-form></todo-create-form>
       <todo-item
         v-for="todo in todos"
         @show-todo-details="showTodoDetails"
@@ -219,7 +268,7 @@ export default {
         :delay="todo.id * 100"
         :key="todo.id"
       ></todo-item>
-
+      <n-button @click="addItem">Add item</n-button>
       <Vue3Lottie
         v-if="todos.length == 0"
         id="todolist-no-data"
