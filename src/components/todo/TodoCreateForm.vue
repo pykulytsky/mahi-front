@@ -1,5 +1,5 @@
 <script>
-import {ref, watch, nextTick} from "vue"
+import { ref, computed } from "vue";
 import {
   NForm,
   NFormItem,
@@ -8,9 +8,10 @@ import {
   NDynamicTags,
   NAutoComplete,
   NIcon,
-  NSpace
+  NSpace,
+  NTooltip,
 } from "naive-ui";
-import { AddOutline } from "@vicons/ionicons5";
+import { AddOutline, CalendarOutline, AlarmOutline } from "@vicons/ionicons5";
 export default {
   components: {
     NForm,
@@ -21,35 +22,46 @@ export default {
     NDynamicTags,
     NAutoComplete,
     AddOutline,
-    NSpace
+    NSpace,
+    CalendarOutline,
+    AlarmOutline,
+    NTooltip,
   },
   setup() {
     const autoCompleteInstRef = ref(null);
     const inputValueRef = ref("");
-    const options = [
-      "shop",
-      "grocery",
-      "sport",
-      "family",
-      "Kate"
-    ]
+    const optionsDefault = ["shop", "grocery", "sport", "family", "Kate"];
     return {
       autoCompleteInstRef,
-      tags: ref(["Teacher", "Programmer"]),
+      tags: ref([]),
       inputValue: inputValueRef,
-      options
-    }
+      options: computed(() => {
+        if (inputValueRef.value === "") {
+         return optionsDefault
+        }
+        return optionsDefault.filter((option) =>
+          option.includes(inputValueRef.value)
+        );
+      }),
+      activate() {
+        setTimeout(() => {
+          autoCompleteInstRef.value?.focus()
+        }, 100)
+      }
+    };
   },
 };
 </script>
 <template>
   <div class="todo-form">
-    <n-input id="todo-title-input"></n-input>
+    <n-input placeholder="Task name" id="todo-title-input"></n-input>
     <n-input
       id="todo-desc-input"
       type="textarea"
+      placeholder="Description"
       :autosize="{
         minRows: 2,
+        maxRows: 9
       }"
     ></n-input>
     <div id="todo-input-bottom">
@@ -57,6 +69,7 @@ export default {
         <n-dynamic-tags>
           <template #input="{ submit, deactivate }">
             <n-auto-complete
+              :get-show="() => true"
               ref="autoCompleteInstRef"
               v-model:value="inputValue"
               size="small"
@@ -73,17 +86,41 @@ export default {
               type="primary"
               dashed
               :disabled="disabled"
-              @click="activate()"
+              @click="activate"
             >
               <template #icon>
                 <n-icon>
                   <add-outline />
                 </n-icon>
               </template>
-              New Tag
+              Add tags
             </n-button>
           </template>
         </n-dynamic-tags>
+        <n-tooltip trigger="hover">
+          <template #trigger>
+            <n-button strong secondary circle>
+              <template #icon>
+                <n-icon>
+                  <calendar-outline />
+                </n-icon>
+              </template>
+            </n-button>
+          </template>
+          Add deadline
+        </n-tooltip>
+        <n-tooltip trigger="hover">
+          <template #trigger>
+        <n-button strong secondary circle>
+          <template #icon>
+            <n-icon>
+              <alarm-outline />
+            </n-icon>
+          </template>
+        </n-button>
+        </template>
+        Add reminder
+        </n-tooltip>
       </div>
 
       <div id="todo-input-bottom-right">
@@ -105,6 +142,7 @@ export default {
 #todo-title-input,
 #todo-desc-input {
   border-radius: 0;
+  font-size: 1rem;
 }
 #todo-title-input {
   border-radius: 5px 5px 0 0;
@@ -116,5 +154,10 @@ export default {
   display: flex;
   justify-content: space-between;
   margin-top: 1%;
+}
+#todo-input-bottom-left {
+  display: flex;
+  gap: 15px;
+  align-items: center;
 }
 </style>
