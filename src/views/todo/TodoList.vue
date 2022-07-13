@@ -24,7 +24,7 @@ import Empty1 from "../../assets/lottie/empty1.json";
 import Empty2 from "../../assets/lottie/empty2.json";
 import Empty3 from "../../assets/lottie/empty3.json";
 import draggable from "vuedraggable";
-import TodoCreateForm from "../../components/todo/TodoCreateForm.vue"
+import TodoCreateForm from "../../components/todo/TodoCreateForm.vue";
 export default {
   components: {
     NPageHeader,
@@ -47,17 +47,17 @@ export default {
     Pin,
     PinnedOff,
     NModal,
-    TodoCreateForm
+    TodoCreateForm,
   },
   setup() {
     const emoji = ref(null);
     const todo = useTodoStore();
-    const common = useCommonStore()
+    const common = useCommonStore();
     const todoDetailIsShown = ref(false);
     const placement = ref("right");
     const isFavorite = ref(false);
     const isPinned = ref(false);
-    const emojiPickerIsShown = ref(false)
+    const emojiPickerIsShown = ref(false);
     const activate = (place) => {
       todoDetailIsShown.value = true;
       placement.value = place;
@@ -65,70 +65,70 @@ export default {
     const todos = ref([
       {
         id: 1,
-        title: "Stoner is a 1965 novel by the American writer John Williams.",
+        title: "cStoner is a 1965 novel by the American writer John Williams.",
         description:
           'Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots. Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots. Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots.',
         isDone: true,
         tags: [
           {
-            type: 'error',
-            title: 'important'
+            type: "error",
+            title: "important",
           },
           {
-            type: 'info',
-            title: 'grocery'
+            type: "info",
+            title: "grocery",
           },
           {
-            type: 'success',
-            title: 'sport'
+            type: "success",
+            title: "sport",
           },
-        ]
+        ],
       },
       {
         id: 2,
-        title: "Stoner is a 19r John Williams.",
-        description: '',
+        title: "hStoner is a 19r John Williams.",
+        description: "",
         isDone: false,
         tags: [
           {
-            type: 'error',
-            title: 'important'
+            type: "error",
+            title: "important",
           },
-        ]
+        ],
       },
       {
         id: 3,
-        title: "Stoner iams.",
+        title: "aStoner iams.",
         description:
           'Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots.',
         isDone: true,
-        tags: []
+        tags: [],
       },
       {
         id: 4,
         title:
-          "Stoner is a 1965 novel by the American writer John Williams. Stoner is a 1965 novel by the American writer John Williams.",
+          "dStoner is a 1965 novel by the American writer John Williams. Stoner is a 1965 novel by the American writer John Williams.",
         description:
           'Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots.',
         isDone: false,
         tags: [
           {
-            type: 'warning',
-            title: 'Kate'
+            type: "warning",
+            title: "Kate",
           },
           {
-            type: 'error',
-            title: 'vacation'
+            type: "error",
+            title: "vacation",
           },
-        ]
+        ],
       },
       {
         id: 5,
-        title: "Stoner is a 1965 novel by the American writer John Williams.",
+        title: "eStoner is a 1965 novel by the American writer John Williams.",
         description:
           'Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots.',
         isDone: false,
-        tags: []
+        tags: [],
       },
       {
         id: 6,
@@ -136,7 +136,7 @@ export default {
         description:
           'Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots.',
         isDone: false,
-        tags: []
+        tags: [],
       },
     ]);
     return {
@@ -161,7 +161,7 @@ export default {
         todoDetailIsShown.value = true;
       },
       onActionSelect(key) {
-        switch(key) {
+        switch (key) {
           case 1:
             break;
           case 2:
@@ -171,7 +171,7 @@ export default {
           case 4:
             break;
           case 5:
-            emojiPickerIsShown.value = true
+            emojiPickerIsShown.value = true;
             break;
           case 6:
             break;
@@ -180,19 +180,16 @@ export default {
         }
       },
       addItem() {
-        todos.value.push({
-                  id: 7,
-        title: "Stoner is a 19r John Williams.",
-        description: '',
-        isDone: false,
-        tags: [
-          {
-            type: 'error',
-            title: 'important'
-          },
-        ]
-        })
-      }
+        todos.value.sort((a, b) => {
+          if (a.title > b.title) {
+            return 1;
+          }
+          if (a.title < b.title) {
+            return -1;
+          }
+          return 0;
+        });
+      },
     };
   },
 };
@@ -200,7 +197,6 @@ export default {
 <template>
   <main>
     <n-page-header @back="handleBack">
-
       <template #title>
         <h1 id="todolist-title">Lorem ipsum dolor sit.</h1>
       </template>
@@ -247,7 +243,11 @@ export default {
             <p v-if="isFavorite">Remove from favorites</p>
             <p v-else>Add to favorites</p>
           </n-tooltip>
-          <n-dropdown trigger="click" :options="todo.todoListOptions" @select="onActionSelect">
+          <n-dropdown
+            trigger="click"
+            :options="todo.todoListOptions"
+            @select="onActionSelect"
+          >
             <n-button text style="font-size: 1.5rem">
               <n-icon>
                 <ellipsis-horizontal-circle />
@@ -260,15 +260,18 @@ export default {
     <n-divider />
     <div class="todolist">
       <todo-create-form></todo-create-form>
-      <todo-item
-        v-for="todo in todos"
-        @show-todo-details="showTodoDetails"
-        :todo="todo"
-        v-motion-pop
-        :delay="todo.id * 100"
-        :key="todo.id"
-      ></todo-item>
-      <n-button @click="addItem">Add item</n-button>
+      <TransitionGroup name="list" tag="div">
+        <todo-item
+          v-for="todo in todos"
+          @show-todo-details="showTodoDetails"
+          :todo="todo"
+          v-motion-pop
+          :delay="todo.id * 100"
+          :key="todo.id"
+        ></todo-item>
+      </TransitionGroup>
+
+      <n-button @click="addItem">Sort items</n-button>
       <Vue3Lottie
         v-if="todos.length == 0"
         id="todolist-no-data"
@@ -289,7 +292,10 @@ export default {
       </n-drawer-content>
     </n-drawer>
     <n-modal v-model:show="emojiPickerIsShown">
-      <VuemojiPicker :is-dark="common.currentTheme == 'dark'" @emojiClick="handleEmojiClick" />
+      <VuemojiPicker
+        :is-dark="common.currentTheme == 'dark'"
+        @emojiClick="handleEmojiClick"
+      />
     </n-modal>
   </main>
 </template>
@@ -321,5 +327,22 @@ export default {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+.list-move, /* apply transition to moving elements */
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.5s ease;
+}
+
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+/* ensure leaving items are taken out of layout flow so that moving
+   animations can be calculated correctly. */
+.list-leave-active {
+  position: absolute;
 }
 </style>

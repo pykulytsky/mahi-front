@@ -112,6 +112,7 @@ export default {
   margin: 5px;
 
   transition: all 0.3s ease-in-out;
+  -webkit-transition: all 0.3s ease-in-out;
 }
 .todo-item-dark {
   outline: 1px solid transparent;
