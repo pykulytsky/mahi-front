@@ -3,7 +3,10 @@ import HomeView from '../views/HomeView.vue'
 import Login from "../views/auth/Login.vue"
 import Register from "../views/auth/Register.vue"
 import ResetPassword from "../views/auth/ResetPassword.vue"
-import TodoList from "../views/todo/TodoList.vue"
+import Project from "../views/tasks/Project.vue"
+import Tags from "../views/tasks/Tags.vue"
+import Today from "../views/tasks/Today.vue"
+import Calendar from "../views/tasks/Calendar.vue"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,9 +32,24 @@ const router = createRouter({
       component: ResetPassword
     },
     {
-      path: '/todo/:id',
-      component: TodoList,
-      name: 'todolist'
+      path: '/project/:id',
+      component: Project,
+      name: 'project'
+    },
+    {
+      path: '/tags',
+      component: Tags,
+      name: 'tags'
+    },
+    {
+      path: '/today',
+      component: Today,
+      name: 'today'
+    },
+    {
+      path: '/calendar',
+      component: Calendar,
+      name: 'calendar'
     },
     {
       path: '/about',

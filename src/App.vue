@@ -1,8 +1,7 @@
 <script>
 import { RouterLink, RouterView, useRoute } from "vue-router";
 import HelloWorld from "@/components/HelloWorld.vue";
-import { ref, h } from "vue";
-import { computed } from "vue";
+import { ref, h, watch, computed } from "vue";
 import { storeToRefs } from "pinia";
 import {
   darkTheme,
@@ -38,10 +37,14 @@ import {
   Menu,
   SearchOutline,
   NotificationsOutline,
+  PricetagOutline,
+  CalendarOutline,
+  CalendarNumberOutline,
 } from "@vicons/ionicons5";
 import { User as UserIcon } from "@vicons/tabler";
 import { onMounted } from "vue";
 import { useCommonStore } from "./stores/common";
+import { useTaskStore } from "./stores/task";
 import router from "./router";
 import AppProvider from "./app.provider.vue";
 
@@ -84,6 +87,7 @@ export default {
     const route = useRoute();
     const path = computed(() => route.path);
     const common = useCommonStore();
+    const task = useTaskStore()
     const { isLoading } = storeToRefs(common);
     const searchInputEnabled = ref(false);
     const searchInput = ref(null);
@@ -115,6 +119,14 @@ export default {
       }
     });
 
+    watch(isLoading, (state) => {
+      if (state == true) {
+        loadingBar.start()
+      } else {
+        loadingBar.finish()
+      }
+    })
+
     function renderIcon(icon) {
       return () => h(NIcon, null, { default: () => h(icon) });
     }
@@ -135,13 +147,55 @@ export default {
             RouterLink,
             {
               to: {
-                name: "about",
+                name: "home",
               },
             },
-            { default: () => "Going Home" }
+            { default: () => "Dashboard" }
           ),
         key: "go-back-home",
         icon: renderIcon(HomeIcon),
+      },
+      {
+        label: () =>
+          h(
+            RouterLink,
+            {
+              to: {
+                name: "today",
+              },
+            },
+            { default: () => "Today" }
+          ),
+        key: "today",
+        icon: renderIcon(CalendarNumberOutline),
+      },
+      {
+        label: () =>
+          h(
+            RouterLink,
+            {
+              to: {
+                name: "calendar",
+              },
+            },
+            { default: () => "Calendar" }
+          ),
+        key: "calendar",
+        icon: renderIcon(CalendarOutline),
+      },
+      {
+        label: () =>
+          h(
+            RouterLink,
+            {
+              to: {
+                name: "tags",
+              },
+            },
+            { default: () => "Tags" }
+          ),
+        key: "tags",
+        icon: renderIcon(PricetagOutline),
       },
       {
         key: "divider-1",
@@ -151,38 +205,6 @@ export default {
             marginLeft: "32px",
           },
         },
-      },
-      {
-        label: () =>
-          h(
-            "a",
-            {
-              href: "https://en.wikipedia.org/wiki/Hear_the_Wind_Sing",
-              target: "_blank",
-              rel: "noopenner noreferrer",
-            },
-            "Hear the Wind Sing"
-          ),
-        key: "hear-the-wind-sing",
-        icon: renderIcon(BookIcon),
-      },
-      {
-        label: "Pinball 1973",
-        key: "pinball-1973",
-        icon: renderIcon(BookIcon),
-        disabled: true,
-        children: [
-          {
-            label: "Rat",
-            key: "rat",
-          },
-        ],
-      },
-      {
-        label: "A Wild Sheep Chase",
-        key: "a-wild-sheep-chase",
-        disabled: true,
-        icon: renderIcon(BookIcon),
       },
       {
         label: "Dance Dance Dance",
@@ -197,7 +219,7 @@ export default {
               {
                 label: "Narrator",
                 key: "narrator",
-                icon: renderIcon(PersonIcon),
+                icon: () => "🥥",
               },
               {
                 label: "Sheep Man",
@@ -247,6 +269,8 @@ export default {
       collapsed: ref(true),
       showSider: ref(true),
       isDarkTheme,
+      task,
+      PricetagOutline,
       SearchOutline,
       handleChange(value) {
         if (value) {
@@ -348,7 +372,7 @@ export default {
             v-if="path !== '/'"
             @scroll="onScroll"
             trigger="hover"
-            style="max-height: 100vh"
+            style="max-height: 95vh"
           >
             <n-layout-content @on-scroll="onScroll">
               <RouterView v-slot="{ Component }">
@@ -401,7 +425,7 @@ export default {
   justify-content: space-between;
 }
 #app {
-  font-family: "Josefin Sans";
+  font-family: "Comfortaa";
   overflow-y: hidden;
 }
 .n-layout .n-layout-scroll-container {

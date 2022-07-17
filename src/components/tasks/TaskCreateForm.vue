@@ -27,6 +27,7 @@ export default {
     AlarmOutline,
     NTooltip,
   },
+  emits: ["closeTaskForm"],
   setup() {
     const autoCompleteInstRef = ref(null);
     const inputValueRef = ref("");
@@ -53,10 +54,13 @@ export default {
 };
 </script>
 <template>
-  <div class="todo-form">
-    <n-input placeholder="Task name" id="todo-title-input"></n-input>
+  <div class="task-form">
     <n-input
-      id="todo-desc-input"
+      placeholder="Task name"
+      id="task-title-input"
+    ></n-input>
+    <n-input
+      id="task-desc-input"
       type="textarea"
       placeholder="Description"
       :autosize="{
@@ -64,8 +68,8 @@ export default {
         maxRows: 9
       }"
     ></n-input>
-    <div id="todo-input-bottom">
-      <div id="todo-input-bottom-left">
+    <div id="task-input-bottom">
+      <div id="task-input-bottom-left">
         <n-dynamic-tags>
           <template #input="{ submit, deactivate }">
             <n-auto-complete
@@ -123,9 +127,9 @@ export default {
         </n-tooltip>
       </div>
 
-      <div id="todo-input-bottom-right">
+      <div id="task-input-bottom-right">
         <n-space>
-          <n-button strong secondary type="error">Cancel</n-button>
+          <n-button @click="$emit('closeTaskForm')" strong secondary type="error">Cancel</n-button>
           <n-button strong secondary type="success">Add task</n-button>
         </n-space>
       </div>
@@ -133,29 +137,29 @@ export default {
   </div>
 </template>
 <style>
-.todo-form {
+.task-form {
   width: 75vw;
   padding: 1%;
   border: 1px solid #e28163ff;
   border-radius: 5px;
 }
-#todo-title-input,
-#todo-desc-input {
+#task-title-input,
+#task-desc-input {
   border-radius: 0;
   font-size: 1rem;
 }
-#todo-title-input {
+#task-title-input {
   border-radius: 5px 5px 0 0;
 }
-#todo-desc-input {
+#task-desc-input {
   border-radius: 0 0 5px 5px;
 }
-#todo-input-bottom {
+#task-input-bottom {
   display: flex;
   justify-content: space-between;
   margin-top: 1%;
 }
-#todo-input-bottom-left {
+#task-input-bottom-left {
   display: flex;
   gap: 15px;
   align-items: center;

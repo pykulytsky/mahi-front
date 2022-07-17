@@ -13,6 +13,7 @@ import {
 import { ref } from "vue";
 import { KeyOutline, MailOutline} from "@vicons/ionicons5";
 import { useMq } from "vue3-mq";
+import { useAuthStore } from "../../stores/auth";
 export default {
   components: {
     NCard,
@@ -27,6 +28,7 @@ export default {
   setup() {
     const formRef = ref(null);
     const message = useMessage();
+    const auth = useAuthStore()
     const mq = useMq()
     const loginModel = ref({
       email: "",
@@ -47,12 +49,16 @@ export default {
       MailOutline,
       KeyOutline,
       mq,
+      auth,
       handleEmail(value) {
         loginModel.value.email = value;
       },
       handlePassword(value) {
         loginModel.value.password = value;
       },
+      handleSignIn() {
+        auth.signIn(loginModel.value.email, loginModel.value.password)
+      }
     };
   },
 };
@@ -112,7 +118,7 @@ export default {
                 </template>
               </n-input>
             </n-form-item>
-            <n-space justify="end">
+            <n-space justify="end" @click="handleSignIn">
               <n-button type="primary">Login</n-button>
             </n-space>
           </n-form>

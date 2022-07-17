@@ -1,5 +1,5 @@
 <script>
-import { ref } from "vue";
+import { ref, onBeforeMount, watch } from "vue";
 import {
   NPageHeader,
   NBreadcrumb,
@@ -13,18 +13,25 @@ import {
   NDrawerContent,
   NTooltip,
   NModal,
+  useLoadingBar
 } from "naive-ui";
 import { VuemojiPicker } from "vuemoji-picker";
-import { EllipsisHorizontalCircle, Star, StarOutline } from "@vicons/ionicons5";
+import {
+  EllipsisHorizontalCircle,
+  Star,
+  StarOutline,
+  AddOutline,
+} from "@vicons/ionicons5";
 import { Pin, PinnedOff } from "@vicons/tabler";
-import { useTodoStore } from "../../stores/todo";
+import { useTaskStore } from "../../stores/task";
 import { useCommonStore } from "../../stores/common";
-import TodoItem from "../../components/todo/TodoItem.vue";
+import Task from "../../components/tasks/Task.vue";
 import Empty1 from "../../assets/lottie/empty1.json";
 import Empty2 from "../../assets/lottie/empty2.json";
 import Empty3 from "../../assets/lottie/empty3.json";
 import draggable from "vuedraggable";
-import TodoCreateForm from "../../components/todo/TodoCreateForm.vue";
+import TodoCreateForm from "../../components/tasks/TaskCreateForm.vue";
+import { storeToRefs } from "pinia";
 export default {
   components: {
     NPageHeader,
@@ -37,7 +44,7 @@ export default {
     NIcon,
     EllipsisHorizontalCircle,
     NSpace,
-    TodoItem,
+    TaskItem: Task,
     NDrawer,
     NDrawerContent,
     Star,
@@ -48,21 +55,41 @@ export default {
     PinnedOff,
     NModal,
     TodoCreateForm,
+    AddOutline,
   },
   setup() {
     const emoji = ref(null);
-    const todo = useTodoStore();
+    const task = useTaskStore();
     const common = useCommonStore();
-    const todoDetailIsShown = ref(false);
+    const taskDetailIsShown = ref(false);
     const placement = ref("right");
     const isFavorite = ref(false);
     const isPinned = ref(false);
     const emojiPickerIsShown = ref(false);
+    const taskFormIsShown = ref(false);
+    const {currentProject} = storeToRefs(task)
+    const loadingBar = useLoadingBar()
+    const tasksLoaded = ref(false)
+
+    onBeforeMount(() => {
+      task.fetchProject(1)
+    })
+
+    watch(currentProject, (state) => {
+      if (state == null) {
+        loadingBar.start()
+      }
+      else {
+        tasksLoaded.value = true
+        loadingBar.finish()
+      }
+    })
+
     const activate = (place) => {
-      todoDetailIsShown.value = true;
+      taskDetailIsShown.value = true;
       placement.value = place;
     };
-    const todos = ref([
+    const tasks = ref([
       {
         id: 1,
         title: "cStoner is a 1965 novel by the American writer John Williams.",
@@ -141,24 +168,27 @@ export default {
     ]);
     return {
       emoji,
-      todo,
+      task,
       common,
-      todoDetailIsShown,
+      taskDetailIsShown,
       placement,
       activate,
       Empty1,
       Empty2,
       Empty3,
-      todos,
+      tasks,
       isFavorite,
       isPinned,
+      tasksLoaded,
       emojiPickerIsShown,
+      taskFormIsShown,
+      currentProject,
       handleBack() {},
       handleEmojiClick(em) {
         emoji.value = em.unicode;
       },
-      showTodoDetails() {
-        todoDetailIsShown.value = true;
+      showTaskDetails() {
+        taskDetailIsShown.value = true;
       },
       onActionSelect(key) {
         switch (key) {
@@ -171,16 +201,18 @@ export default {
           case 4:
             break;
           case 5:
-            emojiPickerIsShown.value = true;
             break;
           case 6:
+            emojiPickerIsShown.value = true;
             break;
           case 7:
             break;
         }
       },
       addItem() {
-        todos.value.sort((a, b) => {
+        task.fetchProjects()
+        console.log(task.currentProject.tasks)
+        tasks.value.sort((a, b) => {
           if (a.title > b.title) {
             return 1;
           }
@@ -198,7 +230,7 @@ export default {
   <main>
     <n-page-header @back="handleBack">
       <template #title>
-        <h1 id="todolist-title">Lorem ipsum dolor sit.</h1>
+        <h1 id="project-title">Lorem ipsum dolor sit.</h1>
       </template>
       <template #header>
         <n-breadcrumb>
@@ -245,7 +277,7 @@ export default {
           </n-tooltip>
           <n-dropdown
             trigger="click"
-            :options="todo.todoListOptions"
+            :options="task.projectOptions"
             @select="onActionSelect"
           >
             <n-button text style="font-size: 1.5rem">
@@ -258,30 +290,56 @@ export default {
       </template>
     </n-page-header>
     <n-divider />
-    <div class="todolist">
-      <todo-create-form></todo-create-form>
+    <div class="project" v-if="tasksLoaded">
+      <n-button
+        v-motion-slide-top
+        v-if="!taskFormIsShown"
+        @click="taskFormIsShown = true"
+        :style="{
+          marginBottom: '15px',
+        }"
+        strong
+        secondary
+        round
+        type="primary"
+      >
+        <template #icon>
+          <n-icon>
+            <add-outline />
+          </n-icon>
+        </template>
+        Add task
+      </n-button>
+      <todo-create-form
+        @close-task-form="taskFormIsShown = false"
+        v-motion-slide-bottom
+        v-if="taskFormIsShown"
+      />
       <TransitionGroup name="list" tag="div">
-        <todo-item
-          v-for="todo in todos"
-          @show-todo-details="showTodoDetails"
-          :todo="todo"
+        <task-item
+          v-for="task in currentProject.tasks"
+          @show-task-details="showTaskDetails"
+          :task="task"
           v-motion-pop
-          :delay="todo.id * 100"
-          :key="todo.id"
-        ></todo-item>
+          :delay="task.id * 100"
+          :key="task.id"
+        ></task-item>
       </TransitionGroup>
 
       <n-button @click="addItem">Sort items</n-button>
       <Vue3Lottie
-        v-if="todos.length == 0"
-        id="todolist-no-data"
+        v-if="tasks.length == 0"
+        id="project-no-data"
         :animationData="Empty2"
         :width="500"
         :height="500"
       />
     </div>
     <n-drawer
-      v-model:show="todoDetailIsShown"
+      :style="{
+        fontFamily: 'Comfortaa',
+      }"
+      v-model:show="taskDetailIsShown"
       :width="752"
       :placement="placement"
       to="body"
@@ -300,7 +358,7 @@ export default {
   </main>
 </template>
 <style>
-.todolist {
+.project {
   margin-bottom: 55px;
   display: flex;
   flex-direction: column;
