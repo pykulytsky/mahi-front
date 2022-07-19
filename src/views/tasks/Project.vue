@@ -1,5 +1,5 @@
 <script>
-import { ref, onBeforeMount, watch } from "vue";
+import { ref, onBeforeMount, watch, onUpdated, onMounted, computed } from "vue";
 import {
   NPageHeader,
   NBreadcrumb,
@@ -13,7 +13,7 @@ import {
   NDrawerContent,
   NTooltip,
   NModal,
-  useLoadingBar
+  useLoadingBar,
 } from "naive-ui";
 import { VuemojiPicker } from "vuemoji-picker";
 import {
@@ -31,7 +31,10 @@ import Empty2 from "../../assets/lottie/empty2.json";
 import Empty3 from "../../assets/lottie/empty3.json";
 import draggable from "vuedraggable";
 import TodoCreateForm from "../../components/tasks/TaskCreateForm.vue";
+import TaskEdit from "../../components/tasks/TaskEdit.vue";
 import { storeToRefs } from "pinia";
+import { updateTask, deleteTask } from "../../api/tasks.api";
+import { useRoute, onBeforeRouteUpdate } from "vue-router";
 export default {
   components: {
     NPageHeader,
@@ -56,10 +59,12 @@ export default {
     NModal,
     TodoCreateForm,
     AddOutline,
+    TaskEdit,
   },
   setup() {
     const emoji = ref(null);
     const task = useTaskStore();
+    const currentTask = ref(null);
     const common = useCommonStore();
     const taskDetailIsShown = ref(false);
     const placement = ref("right");
@@ -67,128 +72,80 @@ export default {
     const isPinned = ref(false);
     const emojiPickerIsShown = ref(false);
     const taskFormIsShown = ref(false);
-    const {currentProject} = storeToRefs(task)
-    const loadingBar = useLoadingBar()
-    const tasksLoaded = ref(false)
+    const { currentProject, currentTasks } = storeToRefs(task);
+    const loadingBar = useLoadingBar();
+    const tasksLoaded = ref(false);
+    const route = useRoute();
+
+    const filler = computed(() => {
+      let choices = [Empty1, Empty2, Empty3];
+      let index = Math.floor(Math.random() * choices.length);
+      return choices[index];
+    });
 
     onBeforeMount(() => {
-      task.fetchProject(1)
-    })
+      task.fetchProject(route.params.id);
+    });
+
+    onBeforeRouteUpdate(() => {
+      setTimeout(() => {
+        task.fetchProject(route.params.id);
+      }, 1);
+    });
+    onMounted(() => {});
+
+    onUpdated(() => {});
 
     watch(currentProject, (state) => {
       if (state == null) {
-        loadingBar.start()
+        loadingBar.start();
+      } else {
+        tasksLoaded.value = true;
+        loadingBar.finish();
       }
-      else {
-        tasksLoaded.value = true
-        loadingBar.finish()
-      }
-    })
+    });
 
     const activate = (place) => {
       taskDetailIsShown.value = true;
       placement.value = place;
     };
-    const tasks = ref([
-      {
-        id: 1,
-        title: "cStoner is a 1965 novel by the American writer John Williams.",
-        description:
-          'Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots. Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots. Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots.',
-        isDone: true,
-        tags: [
-          {
-            type: "error",
-            title: "important",
-          },
-          {
-            type: "info",
-            title: "grocery",
-          },
-          {
-            type: "success",
-            title: "sport",
-          },
-        ],
-      },
-      {
-        id: 2,
-        title: "hStoner is a 19r John Williams.",
-        description: "",
-        isDone: false,
-        tags: [
-          {
-            type: "error",
-            title: "important",
-          },
-        ],
-      },
-      {
-        id: 3,
-        title: "aStoner iams.",
-        description:
-          'Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots.',
-        isDone: true,
-        tags: [],
-      },
-      {
-        id: 4,
-        title:
-          "dStoner is a 1965 novel by the American writer John Williams. Stoner is a 1965 novel by the American writer John Williams.",
-        description:
-          'Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots.',
-        isDone: false,
-        tags: [
-          {
-            type: "warning",
-            title: "Kate",
-          },
-          {
-            type: "error",
-            title: "vacation",
-          },
-        ],
-      },
-      {
-        id: 5,
-        title: "eStoner is a 1965 novel by the American writer John Williams.",
-        description:
-          'Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots.',
-        isDone: false,
-        tags: [],
-      },
-      {
-        id: 6,
-        title: "1965 American writer John Williams.",
-        description:
-          'Set dot-type to change the style of the dots. You can use :show-dots="false" to hide the dots.',
-        isDone: false,
-        tags: [],
-      },
-    ]);
     return {
       emoji,
       task,
+      currentTask,
+      currentTasks,
       common,
       taskDetailIsShown,
       placement,
       activate,
-      Empty1,
-      Empty2,
-      Empty3,
-      tasks,
+      filler,
       isFavorite,
       isPinned,
       tasksLoaded,
       emojiPickerIsShown,
       taskFormIsShown,
       currentProject,
+      route,
       handleBack() {},
       handleEmojiClick(em) {
         emoji.value = em.unicode;
       },
-      showTaskDetails() {
+      showTaskDetails(task) {
+        currentTask.value = task;
         taskDetailIsShown.value = true;
+      },
+      changeTaskStatus(currentTask) {
+        common.setLoading(true);
+        updateTask(
+          currentTask.id,
+          currentTask.name,
+          currentTask.description,
+          currentTask.deadline,
+          !currentTask.is_done,
+        ).then(() => {
+          task.fetchProject(route.params.id);
+          common.setLoading(false);
+        })
       },
       onActionSelect(key) {
         switch (key) {
@@ -210,8 +167,6 @@ export default {
         }
       },
       addItem() {
-        task.fetchProjects()
-        console.log(task.currentProject.tasks)
         tasks.value.sort((a, b) => {
           if (a.title > b.title) {
             return 1;
@@ -222,24 +177,54 @@ export default {
           return 0;
         });
       },
+      handleUpdateTask() {
+        common.setLoading(true);
+        updateTask(
+          currentTask.value.id,
+          currentTask.value.name,
+          currentTask.value.description,
+          currentTask.value.deadline,
+          currentTask.value.is_done
+        ).then(() => {
+          task.fetchProject(route.params.id);
+          taskDetailIsShown.value = false;
+          common.setLoading(false);
+        });
+      },
+      handleDeleteTask() {
+        common.setLoading(true);
+        deleteTask(currentTask.value.id).then(() => {
+          task.fetchProject(route.params.id);
+          taskDetailIsShown.value = false;
+          common.setLoading(false);
+        })
+      }
     };
   },
 };
 </script>
 <template>
-  <main>
+  <main v-if="task.currentProject && currentTasks">
     <n-page-header @back="handleBack">
       <template #title>
-        <h1 id="project-title">Lorem ipsum dolor sit.</h1>
+        <h1 v-if="task.currentProject !== null" id="project-title">
+          {{ task.currentProject.name }}
+        </h1>
       </template>
       <template #header>
         <n-breadcrumb>
-          <n-breadcrumb-item>Todo lists</n-breadcrumb-item>
-          <n-breadcrumb-item>Lorem ipsum dolor sit.</n-breadcrumb-item>
+          <n-breadcrumb-item>Projects</n-breadcrumb-item>
+          <n-breadcrumb-item v-if="task.currentProject.is_favorite"
+            >Favorites</n-breadcrumb-item
+          >
+          <n-breadcrumb-item v-if="task.currentProject.is_pinned"
+            >Pinned</n-breadcrumb-item
+          >
+          <n-breadcrumb-item>{{ task.currentProject.name }}</n-breadcrumb-item>
         </n-breadcrumb>
       </template>
-      <template #avatar>
-        {{ emoji }}
+      <template #avatar v-if="task.currentProject">
+        {{ task.currentProject.icon }}
       </template>
       <template #extra>
         <n-space>
@@ -311,26 +296,25 @@ export default {
         Add task
       </n-button>
       <todo-create-form
+        @updateProject="task.fetchProject(route.params.id)"
         @close-task-form="taskFormIsShown = false"
         v-motion-slide-bottom
         v-if="taskFormIsShown"
       />
-      <TransitionGroup name="list" tag="div">
-        <task-item
-          v-for="task in currentProject.tasks"
-          @show-task-details="showTaskDetails"
-          :task="task"
-          v-motion-pop
-          :delay="task.id * 100"
-          :key="task.id"
-        ></task-item>
-      </TransitionGroup>
+      <task-item
+        v-for="(task, i) in currentTasks"
+        @show-task-details="showTaskDetails"
+        @changeTaskStatus="changeTaskStatus"
+        :task="task"
+        v-motion-pop
+        :delay="i * 100"
+        :key="i"
+      ></task-item>
 
-      <n-button @click="addItem">Sort items</n-button>
       <Vue3Lottie
-        v-if="tasks.length == 0"
+        v-if="currentTasks.length == 0"
         id="project-no-data"
-        :animationData="Empty2"
+        :animationData="filler"
         :width="500"
         :height="500"
       />
@@ -345,8 +329,25 @@ export default {
       to="body"
       :height="100"
     >
-      <n-drawer-content title="Stoner">
-        Stoner is a 1965 novel by the American writer John Williams.
+      <n-drawer-content title="Edit task" id="edit-task-drawer">
+        <task-edit :task="currentTask" />
+        <template #footer>
+          <n-space>
+            <n-button @click="handleDeleteTask" type="error">Delete Task</n-button>
+          </n-space>
+          <n-space>
+            <n-button
+              @click="taskDetailIsShown = false"
+              strong
+              secondary
+              type="error"
+              >Cancel</n-button
+            >
+            <n-button @click="handleUpdateTask" strong secondary type="success"
+              >Save</n-button
+            >
+          </n-space>
+        </template>
       </n-drawer-content>
     </n-drawer>
     <n-modal v-model:show="emojiPickerIsShown">
@@ -359,7 +360,6 @@ export default {
 </template>
 <style>
 .project {
-  margin-bottom: 55px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -402,5 +402,8 @@ export default {
    animations can be calculated correctly. */
 .list-leave-active {
   position: absolute;
+}
+#edit-task-drawer .n-drawer-footer {
+  justify-content: space-between;
 }
 </style>

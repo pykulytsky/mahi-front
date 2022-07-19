@@ -2,6 +2,8 @@ import { defineStore } from "pinia";
 import { h } from "vue";
 import { NIcon } from "naive-ui";
 import http from "../api/axios"
+import { getTasksByProject } from "../api/tasks.api";
+import { fetchUserTags } from "../api/tags.api";
 import { useCommonStore } from "./common";
 import {
   CreateOutline,
@@ -32,7 +34,9 @@ export const useTaskStore = defineStore({
     _pinned: [],
     _favorites: [],
     _projects: [],
+    _tags: [],
     _currentProject: null,
+    _currentTasks: null,
     _projectOptions: [
       {
         label: "Edit",
@@ -106,7 +110,9 @@ export const useTaskStore = defineStore({
     pinned: (state) => state._pinned,
     favorites: (state) => state._favorites,
     projects: (state) => state._projects,
-    currentProject: (state) => state._currentProject
+    currentProject: (state) => state._currentProject,
+    currentTasks: (state) => state._currentTasks,
+    tags: (state) => state._tags
   },
   actions: {
     setPinned(pinnedProjects) {
@@ -117,6 +123,15 @@ export const useTaskStore = defineStore({
     },
     setProjects(projects) {
       this._projects = projects
+    },
+    setCurrentProject(project) {
+      this._currentProject = project
+    },
+    setCurrentTasks(tasks) {
+      this._currentTasks = tasks
+    },
+    setTags(tags) {
+      this._tags = tags
     },
     fetchProjects() {
       const common = useCommonStore()
@@ -149,6 +164,18 @@ export const useTaskStore = defineStore({
       http.get("/projects/" + projectID)
       .then(response => {
         this._currentProject = response.data
+        getTasksByProject(response.data.id)
+        .then(resp => {
+          this.setCurrentTasks(resp.data)
+          common.setLoading(false)
+        })
+      })
+    },
+    fetchTags() {
+      const common = useCommonStore()
+      common.setLoading(true)
+      fetchUserTags().then(response => {
+        this.setTags(response.data)
         common.setLoading(false)
       })
     }

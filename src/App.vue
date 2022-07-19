@@ -1,7 +1,7 @@
 <script>
-import { RouterLink, RouterView, useRoute } from "vue-router";
+import { RouterLink, RouterView, useRoute, useRouter } from "vue-router";
 import HelloWorld from "@/components/HelloWorld.vue";
-import { ref, h, watch, computed } from "vue";
+import { ref, h, watch, computed, onMounted, onBeforeMount } from "vue";
 import { storeToRefs } from "pinia";
 import {
   darkTheme,
@@ -27,6 +27,7 @@ import {
   createDiscreteApi,
   NSpace,
   NAvatar,
+  NDivider,
 } from "naive-ui";
 import {
   BookOutline as BookIcon,
@@ -42,7 +43,6 @@ import {
   CalendarNumberOutline,
 } from "@vicons/ionicons5";
 import { User as UserIcon } from "@vicons/tabler";
-import { onMounted } from "vue";
 import { useCommonStore } from "./stores/common";
 import { useTaskStore } from "./stores/task";
 import router from "./router";
@@ -81,16 +81,19 @@ export default {
     NAvatar,
     SearchOutline,
     UserIcon,
+    NDivider,
   },
 
   setup() {
     const route = useRoute();
     const path = computed(() => route.path);
     const common = useCommonStore();
-    const task = useTaskStore()
+    const task = useTaskStore();
     const { isLoading } = storeToRefs(common);
+    const { projects } = storeToRefs(task);
     const searchInputEnabled = ref(false);
     const searchInput = ref(null);
+    const router = useRouter()
 
     const theme = ref(null);
     router.beforeEach(function (to, from, next) {
@@ -104,6 +107,64 @@ export default {
     });
 
     const isDarkTheme = ref(false);
+
+    onBeforeMount(() => {
+      task.fetchProjects();
+      task.fetchTags()
+    });
+
+    const menuOptions = ref([
+      {
+        label: "Dashboard",
+        key: "dashboard",
+        icon: renderIcon(HomeIcon),
+      },
+      {
+        label: "Today",
+        key: "today",
+        icon: renderIcon(CalendarNumberOutline),
+      },
+      {
+        label: "Calendar",
+        key: "calendar",
+        icon: renderIcon(CalendarOutline),
+      },
+      {
+        label: "Tags",
+        key: "tags",
+        icon: renderIcon(PricetagOutline),
+      },
+      {
+        key: "divider-1",
+        type: "divider",
+        props: {
+          style: {
+            marginLeft: "32px",
+          },
+        },
+      },
+      {
+        type: "group",
+        label: "Favorites",
+        key: "favorites",
+        children: [
+
+        ]
+      }
+    ]);
+
+    watch(projects, (state) => {
+      if (state !== null) {
+        state.forEach((project) => {
+          menuOptions.value.push({
+            label: project.name,
+            key: project.id,
+            icon: () => project.icon !== null? project.icon: "🥥",
+          });
+
+        });
+      }
+    });
 
     onMounted(() => {
       common.setTheme(localStorage.getItem("theme"));
@@ -121,11 +182,11 @@ export default {
 
     watch(isLoading, (state) => {
       if (state == true) {
-        loadingBar.start()
+        loadingBar.start();
       } else {
-        loadingBar.finish()
+        loadingBar.finish();
       }
-    })
+    });
 
     function renderIcon(icon) {
       return () => h(NIcon, null, { default: () => h(icon) });
@@ -140,123 +201,6 @@ export default {
       },
     };
 
-    const menuOptions = [
-      {
-        label: () =>
-          h(
-            RouterLink,
-            {
-              to: {
-                name: "home",
-              },
-            },
-            { default: () => "Dashboard" }
-          ),
-        key: "go-back-home",
-        icon: renderIcon(HomeIcon),
-      },
-      {
-        label: () =>
-          h(
-            RouterLink,
-            {
-              to: {
-                name: "today",
-              },
-            },
-            { default: () => "Today" }
-          ),
-        key: "today",
-        icon: renderIcon(CalendarNumberOutline),
-      },
-      {
-        label: () =>
-          h(
-            RouterLink,
-            {
-              to: {
-                name: "calendar",
-              },
-            },
-            { default: () => "Calendar" }
-          ),
-        key: "calendar",
-        icon: renderIcon(CalendarOutline),
-      },
-      {
-        label: () =>
-          h(
-            RouterLink,
-            {
-              to: {
-                name: "tags",
-              },
-            },
-            { default: () => "Tags" }
-          ),
-        key: "tags",
-        icon: renderIcon(PricetagOutline),
-      },
-      {
-        key: "divider-1",
-        type: "divider",
-        props: {
-          style: {
-            marginLeft: "32px",
-          },
-        },
-      },
-      {
-        label: "Dance Dance Dance",
-        key: "Dance Dance Dance",
-        icon: renderIcon(BookIcon),
-        children: [
-          {
-            type: "group",
-            label: "People",
-            key: "people",
-            children: [
-              {
-                label: "Narrator",
-                key: "narrator",
-                icon: () => "🥥",
-              },
-              {
-                label: "Sheep Man",
-                key: "sheep-man",
-                icon: renderIcon(PersonIcon),
-              },
-            ],
-          },
-          {
-            label: "Beverage",
-            key: "beverage",
-            icon: renderIcon(WineIcon),
-            children: [
-              {
-                label: "Whisky",
-                key: "whisky",
-              },
-            ],
-          },
-          {
-            label: "Food",
-            key: "food",
-            children: [
-              {
-                label: "Sandwich",
-                key: "sandwich",
-              },
-            ],
-          },
-          {
-            label: "The past increases. The future recedes.",
-            key: "the-past-increases-the-future-recedes",
-          },
-        ],
-      },
-    ];
-
     return {
       darkTheme,
       theme,
@@ -264,6 +208,7 @@ export default {
       themeOverrides,
       path,
       common,
+      router,
       searchInput,
       searchInputEnabled,
       collapsed: ref(true),
@@ -291,6 +236,13 @@ export default {
       onFocusOut() {
         searchInputEnabled.value = false;
       },
+      handleSiderRoute(key, item) {
+        if (Number.isInteger(key)) {
+          router.push("/project/" + key)
+        } else {
+          router.push("/" + key)
+        }
+      }
     };
   },
 };
@@ -309,7 +261,7 @@ export default {
           @expand="common.setSiderVisability(false)"
           v-if="showSider && !common.disableSidebar.includes(path)"
         >
-          <n-menu :options="menuOptions" />
+          <n-menu @update:value="handleSiderRoute" :options="menuOptions" />
         </n-layout-sider>
         <n-layout>
           <n-layout-header
@@ -356,7 +308,11 @@ export default {
                 </template>
               </n-auto-complete>
 
-              <n-button class="hvr-buzz" text style="font-size: 1.5rem; margin: 0 15px">
+              <n-button
+                class="hvr-buzz"
+                text
+                style="font-size: 1.5rem; margin: 0 15px"
+              >
                 <n-icon>
                   <notifications-outline />
                 </n-icon>
@@ -426,13 +382,14 @@ export default {
 }
 #app {
   font-family: "Comfortaa";
+  /* font-family: "Josefin Sans"; */
   overflow-y: hidden;
 }
 .n-layout .n-layout-scroll-container {
   overflow-y: hidden;
 }
 .n-layout-content {
-  min-height: 100vh;
+  min-height: 95vh;
 }
 ::selection {
   background: #e28163ff;
@@ -496,7 +453,9 @@ export default {
   transform: perspective(1px) translateZ(0);
   box-shadow: 0 0 1px rgba(0, 0, 0, 0);
 }
-.hvr-buzz:hover, .hvr-buzz:focus, .hvr-buzz:active {
+.hvr-buzz:hover,
+.hvr-buzz:focus,
+.hvr-buzz:active {
   -webkit-animation-name: hvr-buzz;
   animation-name: hvr-buzz;
   -webkit-animation-duration: 0.3s;
