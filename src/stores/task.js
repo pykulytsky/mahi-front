@@ -16,9 +16,9 @@ import {
   FunnelOutline,
   TextOutline,
   TimeOutline,
-  CheckmarkDoneOutline
+  CheckmarkDoneOutline,
 } from "@vicons/ionicons5";
-
+import {Lock, LockOpen} from "@vicons/tabler"
 const renderIcon = (icon) => {
   return () => {
     return h(NIcon, null, {
@@ -40,7 +40,7 @@ export const useTaskStore = defineStore({
     _projectOptions: [
       {
         label: "Edit",
-        key: 1,
+        key: 1  ,
         icon: renderIcon(CreateOutline),
       },
       {
@@ -106,7 +106,24 @@ export const useTaskStore = defineStore({
     ],
   }),
   getters: {
-    projectOptions: (state) => state._projectOptions,
+    projectOptions: (state) => {
+      if (state._projectOptions.filter(option => ['lock', 'unlock'].includes(option.key)).length == 0) {
+        if (state._currentProject.is_editable) {
+          state._projectOptions.splice(2, 0, {
+              label: "Lock",
+              key: 'lock',
+              icon: renderIcon(Lock)
+          })
+        } else {
+          state._projectOptions.splice(2, 0, {
+              label: "Unlock",
+              key: 'unlock',
+              icon: renderIcon(LockOpen)
+          })
+        }
+      }
+      return state._projectOptions
+    },
     pinned: (state) => state._pinned,
     favorites: (state) => state._favorites,
     projects: (state) => state._projects,
@@ -177,6 +194,13 @@ export const useTaskStore = defineStore({
       fetchUserTags().then(response => {
         this.setTags(response.data)
         common.setLoading(false)
+      })
+    },
+    getTagIDByName(tagName) {
+      this.tags.forEach(tag => {
+        if (tag.name == tagName) {
+          return tag.id
+        }
       })
     }
   }

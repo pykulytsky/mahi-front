@@ -35,7 +35,6 @@ export const useAuthStore = defineStore({
         "Content-Type": "application/x-www-form-urlencoded"
       })
       .then(response => {
-        console.log(response)
         this.setToken(response.data.access_token)
         http.get("/users/me/")
         .then(userData => {

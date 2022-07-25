@@ -1,5 +1,5 @@
 <script>
-import { RouterLink, RouterView, useRoute, useRouter } from "vue-router";
+import { RouterView, useRoute, useRouter } from "vue-router";
 import HelloWorld from "@/components/HelloWorld.vue";
 import { ref, h, watch, computed, onMounted, onBeforeMount } from "vue";
 import { storeToRefs } from "pinia";
@@ -23,16 +23,12 @@ import {
   NLoadingBarProvider,
   NMessageProvider,
   NNotificationProvider,
-  useLoadingBar,
   createDiscreteApi,
   NSpace,
   NAvatar,
   NDivider,
 } from "naive-ui";
 import {
-  BookOutline as BookIcon,
-  PersonOutline as PersonIcon,
-  WineOutline as WineIcon,
   HomeOutline as HomeIcon,
   MenuOutline,
   Menu,
@@ -45,9 +41,7 @@ import {
 import { User as UserIcon } from "@vicons/tabler";
 import { useCommonStore } from "./stores/common";
 import { useTaskStore } from "./stores/task";
-import router from "./router";
 import AppProvider from "./app.provider.vue";
-
 const { loadingBar } = createDiscreteApi(["loadingBar"]);
 
 export default {
@@ -93,7 +87,8 @@ export default {
     const { projects } = storeToRefs(task);
     const searchInputEnabled = ref(false);
     const searchInput = ref(null);
-    const router = useRouter()
+    const router = useRouter();
+    const avatar = new URL('./assets/avatars/55.svg', import.meta.url).href
 
     const theme = ref(null);
     router.beforeEach(function (to, from, next) {
@@ -110,7 +105,53 @@ export default {
 
     onBeforeMount(() => {
       task.fetchProjects();
-      task.fetchTags()
+      task.fetchTags();
+      setTimeout(() => {
+        common.setLoading(true);
+        task.pinned.forEach((project) => {
+          menuOptions.value.push({
+            label: project.name,
+            key: project.id,
+            icon: () => (project.icon !== null ? project.icon : "🥥"),
+          });
+        });
+        menuOptions.value.push({
+          key: "divider-2",
+          type: "divider",
+          props: {
+            style: {
+              marginLeft: "32px",
+            },
+          },
+        });
+        let favoritesGroup = {
+          label: "Favorites",
+          key: "favorites",
+          children: [],
+        };
+        task.favorites.forEach((project) => {
+          favoritesGroup.children.push({
+            label: project.name,
+            key: project.id,
+            icon: () => (project.icon !== null ? project.icon : "🥥"),
+          });
+        });
+        menuOptions.value.push(favoritesGroup);
+        let projectsGroup = {
+          label: "Projects",
+          key: "projects",
+          children: [],
+        };
+        task.projects.forEach((project) => {
+          projectsGroup.children.push({
+            label: project.name,
+            key: project.id,
+            icon: () => (project.icon !== null ? project.icon : "🥥"),
+          });
+        });
+        menuOptions.value.push(projectsGroup);
+        common.setLoading(true);
+      }, 1);
     });
 
     const menuOptions = ref([
@@ -143,28 +184,7 @@ export default {
           },
         },
       },
-      {
-        type: "group",
-        label: "Favorites",
-        key: "favorites",
-        children: [
-
-        ]
-      }
     ]);
-
-    watch(projects, (state) => {
-      if (state !== null) {
-        state.forEach((project) => {
-          menuOptions.value.push({
-            label: project.name,
-            key: project.id,
-            icon: () => project.icon !== null? project.icon: "🥥",
-          });
-
-        });
-      }
-    });
 
     onMounted(() => {
       common.setTheme(localStorage.getItem("theme"));
@@ -217,6 +237,7 @@ export default {
       task,
       PricetagOutline,
       SearchOutline,
+      avatar,
       handleChange(value) {
         if (value) {
           theme.value = darkTheme;
@@ -226,7 +247,8 @@ export default {
           common.setTheme("light");
         }
       },
-      onScroll(event) {},
+      onScroll(event) {
+      },
       focusSearchInput() {
         searchInputEnabled.value = true;
         setTimeout(() => {
@@ -238,11 +260,11 @@ export default {
       },
       handleSiderRoute(key, item) {
         if (Number.isInteger(key)) {
-          router.push("/project/" + key)
+          router.push("/project/" + key);
         } else {
-          router.push("/" + key)
+          router.push("/" + key);
         }
-      }
+      },
     };
   },
 };
@@ -261,7 +283,11 @@ export default {
           @expand="common.setSiderVisability(false)"
           v-if="showSider && !common.disableSidebar.includes(path)"
         >
-          <n-menu @update:value="handleSiderRoute" :options="menuOptions" />
+          <n-menu
+            :default-expanded-keys="['favorites', 'projects']"
+            @update:value="handleSiderRoute"
+            :options="menuOptions"
+          />
         </n-layout-sider>
         <n-layout>
           <n-layout-header
@@ -317,10 +343,7 @@ export default {
                   <notifications-outline />
                 </n-icon>
               </n-button>
-              <n-avatar id="navbar-avatar" round :size="30">
-                <n-icon :size="25">
-                  <user-icon />
-                </n-icon>
+              <n-avatar :src="avatar" color="#E28163FF" id="navbar-avatar" round :size="30">
               </n-avatar>
             </div>
           </n-layout-header>
@@ -338,7 +361,7 @@ export default {
               </RouterView>
             </n-layout-content>
           </n-scrollbar>
-          <n-layout-header
+          <!-- <n-layout-header
             v-if="path == '/'"
             id="navbar"
             :position="'fixed'"
@@ -348,7 +371,7 @@ export default {
               v-model:value="isDarkTheme"
               @update:value="handleChange"
             />
-          </n-layout-header>
+          </n-layout-header> -->
 
           <n-layout-content v-if="path == '/'" @on-scroll="onScroll">
             <RouterView v-slot="{ Component }">
@@ -372,6 +395,14 @@ export default {
 
 <style>
 @import "@/assets/base.css";
+@font-face {
+  font-family: "Avenir";
+  src: url("./assets/avenir/AvenirNextRoundedStd-Demi.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Beatrice";
+  src: url("./assets/beatrice/Beatrice Display Black.ttf") format("truetype");
+}
 #navbar {
   backdrop-filter: blur(1px);
   height: 5vh;

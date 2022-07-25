@@ -60,7 +60,6 @@ export default {
         taskActionsIsShown.value = false;
       },
       handleTaskFinish() {
-        console.log(props.task.id);
       },
     };
   },

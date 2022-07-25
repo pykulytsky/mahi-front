@@ -14,13 +14,15 @@ import {
   NTooltip,
   NModal,
   useLoadingBar,
+  useMessage,
+  useDialog,
 } from "naive-ui";
 import { VuemojiPicker } from "vuemoji-picker";
 import {
   EllipsisHorizontalCircle,
   Star,
   StarOutline,
-  AddOutline,
+  AddCircle,
 } from "@vicons/ionicons5";
 import { Pin, PinnedOff } from "@vicons/tabler";
 import { useTaskStore } from "../../stores/task";
@@ -34,7 +36,8 @@ import TodoCreateForm from "../../components/tasks/TaskCreateForm.vue";
 import TaskEdit from "../../components/tasks/TaskEdit.vue";
 import { storeToRefs } from "pinia";
 import { updateTask, deleteTask } from "../../api/tasks.api";
-import { useRoute, onBeforeRouteUpdate } from "vue-router";
+import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
+import { updateProject, deleteProject } from "../../api/projects.api";
 export default {
   components: {
     NPageHeader,
@@ -58,8 +61,8 @@ export default {
     PinnedOff,
     NModal,
     TodoCreateForm,
-    AddOutline,
     TaskEdit,
+    AddCircle,
   },
   setup() {
     const emoji = ref(null);
@@ -76,6 +79,9 @@ export default {
     const loadingBar = useLoadingBar();
     const tasksLoaded = ref(false);
     const route = useRoute();
+    const router = useRouter();
+    const message = useMessage();
+    const dialog = useDialog();
 
     const filler = computed(() => {
       let choices = [Empty1, Empty2, Empty3];
@@ -93,7 +99,6 @@ export default {
       }, 1);
     });
     onMounted(() => {});
-
     onUpdated(() => {});
 
     watch(currentProject, (state) => {
@@ -109,6 +114,47 @@ export default {
       taskDetailIsShown.value = true;
       placement.value = place;
     };
+
+    const handleUpdateProject = () => {
+      common.setLoading(true);
+      updateProject(
+        currentProject.value.id,
+        currentProject.value.name,
+        currentProject.value.description,
+        currentProject.value.icon,
+        currentProject.value.accent_color,
+        currentProject.value.is_favorite,
+        currentProject.value.is_pinned,
+        currentProject.value.is_editable
+      ).then(() => {
+        task.fetchProject(route.params.id);
+        common.setLoading(false);
+      });
+    };
+
+    const handleDeleteProject = () => {
+      dialog.warning({
+        title: "Are you sure?",
+        content: "Are you sure you want to delete this project?",
+        positiveText: "Yes",
+        negativeText: "No",
+        onPositiveClick: () => {
+          common.setLoading(true);
+          deleteProject(currentProject.value.id).then(() => {
+            message.success(
+              "Project " +
+                currentProject.value.name +
+                " was successfully deleted"
+            );
+            task.fetchProjects();
+            router.push("/today");
+            common.setLoading(true);
+          });
+        },
+        onNegativeClick: () => {},
+      });
+    };
+
     return {
       emoji,
       task,
@@ -126,13 +172,17 @@ export default {
       taskFormIsShown,
       currentProject,
       route,
+      handleUpdateProject,
+      handleDeleteProject,
       handleBack() {},
-      handleEmojiClick(em) {
-        emoji.value = em.unicode;
-      },
       showTaskDetails(task) {
         currentTask.value = task;
         taskDetailIsShown.value = true;
+      },
+
+      handleEmojiClick(em) {
+        currentProject.value.icon = em.unicode;
+        handleUpdateProject();
       },
       changeTaskStatus(currentTask) {
         common.setLoading(true);
@@ -141,11 +191,14 @@ export default {
           currentTask.name,
           currentTask.description,
           currentTask.deadline,
-          !currentTask.is_done,
+          !currentTask.is_done
         ).then(() => {
           task.fetchProject(route.params.id);
+          if (!currentTask.is_done) {
+            message.success("1 task completed");
+          }
           common.setLoading(false);
-        })
+        });
       },
       onActionSelect(key) {
         switch (key) {
@@ -163,6 +216,17 @@ export default {
             emojiPickerIsShown.value = true;
             break;
           case 7:
+            break;
+          case 8:
+            handleDeleteProject()
+            break;
+          case "lock":
+            currentProject.value.is_editable = false;
+            handleUpdateProject();
+            break;
+          case "unlock":
+            currentProject.value.is_editable = true;
+            handleUpdateProject();
             break;
         }
       },
@@ -188,6 +252,7 @@ export default {
         ).then(() => {
           task.fetchProject(route.params.id);
           taskDetailIsShown.value = false;
+          message.info("1 task updated");
           common.setLoading(false);
         });
       },
@@ -196,9 +261,10 @@ export default {
         deleteTask(currentTask.value.id).then(() => {
           task.fetchProject(route.params.id);
           taskDetailIsShown.value = false;
+          message.error("1 task deleted");
           common.setLoading(false);
-        })
-      }
+        });
+      },
     };
   },
 };
@@ -231,33 +297,43 @@ export default {
           <n-tooltip>
             <template #trigger>
               <n-button
-                @click="isPinned = !isPinned"
+                @click="
+                  () => {
+                    currentProject.is_pinned = !currentProject.is_pinned;
+                    handleUpdateProject();
+                  }
+                "
                 text
                 style="font-size: 1.5rem"
               >
                 <n-icon>
-                  <pinned-off v-if="isPinned" />
+                  <pinned-off v-if="currentProject.is_pinned" />
                   <pin v-else />
                 </n-icon>
               </n-button>
             </template>
-            <p v-if="isPinned">Unpin from sidebar</p>
+            <p v-if="currentProject.is_pinned">Unpin from sidebar</p>
             <p v-else>Pin to sidebar</p>
           </n-tooltip>
           <n-tooltip>
             <template #trigger>
               <n-button
-                @click="isFavorite = !isFavorite"
+                @click="
+                  () => {
+                    currentProject.is_favorite = !currentProject.is_favorite;
+                    handleUpdateProject();
+                  }
+                "
                 text
                 style="font-size: 1.3rem"
               >
                 <n-icon>
-                  <star-outline v-if="!isFavorite" />
+                  <star-outline v-if="!currentProject.is_favorite" />
                   <star v-else />
                 </n-icon>
               </n-button>
             </template>
-            <p v-if="isFavorite">Remove from favorites</p>
+            <p v-if="currentProject.is_favorite">Remove from favorites</p>
             <p v-else>Add to favorites</p>
           </n-tooltip>
           <n-dropdown
@@ -278,7 +354,7 @@ export default {
     <div class="project" v-if="tasksLoaded">
       <n-button
         v-motion-slide-top
-        v-if="!taskFormIsShown"
+        v-if="currentProject.is_editable && !taskFormIsShown"
         @click="taskFormIsShown = true"
         :style="{
           marginBottom: '15px',
@@ -289,8 +365,8 @@ export default {
         type="primary"
       >
         <template #icon>
-          <n-icon>
-            <add-outline />
+          <n-icon size="20">
+            <add-circle />
           </n-icon>
         </template>
         Add task
@@ -333,7 +409,9 @@ export default {
         <task-edit :task="currentTask" />
         <template #footer>
           <n-space>
-            <n-button @click="handleDeleteTask" type="error">Delete Task</n-button>
+            <n-button @click="handleDeleteTask" type="error"
+              >Delete Task</n-button
+            >
           </n-space>
           <n-space>
             <n-button

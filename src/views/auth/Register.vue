@@ -170,32 +170,9 @@ export default {
 <template>
   <main>
     <div class="wrapper">
-      <div class="blobs">
-        <svg
-          version="1.1"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 500 500"
-          width="150%"
-          id="login-blob"
-          style="opacity: 1"
-          filter="blur(4.2px)"
-        >
-          <defs>
-            <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" style="stop-color: rgb(238, 205, 163)"></stop>
-              <stop offset="100%" style="stop-color: rgb(121, 50, 11)"></stop>
-            </linearGradient>
-          </defs>
-          <path id="blob" fill="url(#gradient)" style="opacity: 1">
-            <animate
-              attributeName="d"
-              dur="10s"
-              repeatCount="indefinite"
-              values="M390.7302,319.10952Q360.37524,388.21905,284.62068,409.39959Q208.86612,430.58014,161.11156,373.20082Q113.35701,315.8215,88.46857,238.04463Q63.58014,160.26776,136.76776,117.04463Q209.95537,73.8215,303.79007,69.52027Q397.62476,65.21905,409.35497,157.60952Q421.08517,250,390.7302,319.10952Z;M429.79847,339.54154Q392.67727,429.08308,294.97368,455.00137Q197.27008,480.91966,143.94598,403.56786Q90.62188,326.21607,83.52769,246.22992Q76.43351,166.24376,136.8518,92.77008Q197.27008,19.29641,287.1482,55Q377.02632,90.70359,421.97299,170.3518Q466.91966,250,429.79847,339.54154Z;M451.77435,331.68776Q380.0333,413.37552,297.8522,408.1811Q215.67111,402.98668,163.20108,360.14446Q110.73105,317.30225,116.40549,253.17111Q122.07993,189.03996,169.7144,146.88551Q217.34887,104.73105,314.55328,76.47669Q411.75769,48.22232,467.63654,149.11116Q523.51539,250,451.77435,331.68776Z;M390.7302,319.10952Q360.37524,388.21905,284.62068,409.39959Q208.86612,430.58014,161.11156,373.20082Q113.35701,315.8215,88.46857,238.04463Q63.58014,160.26776,136.76776,117.04463Q209.95537,73.8215,303.79007,69.52027Q397.62476,65.21905,409.35497,157.60952Q421.08517,250,390.7302,319.10952Z"
-            ></animate>
-          </path>
-        </svg>
-      </div>
+      <img id="register-blob1" src="../../assets/abstract/abstract1.png" alt="" width="500" height="500">
+      <img id="register-blob2" src="../../assets/abstract/abstract2.png" alt="" width="500" height="500">
+      <img id="register-blob3" src="../../assets/abstract/abstract3.png" alt="" width="500" height="500">
       <div :class="mq.lgPlus? 'register': 'register-small'">
         <n-card title="Create an account">
           <n-steps
@@ -264,7 +241,7 @@ export default {
 </template>
 <style scoped>
 .wrapper {
-  height: 100vh;
+  height: 95vh;
 }
 .register {
   position: absolute;

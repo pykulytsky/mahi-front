@@ -16,7 +16,9 @@ import {
 import { CalendarOutline, AlarmOutline, PricetagOutline } from "@vicons/ionicons5";
 import { storeToRefs } from "pinia";
 import { addTask } from "../../api/tasks.api";
+import { addTag } from "../../api/tags.api"
 import { useTaskStore } from "../../stores/task";
+import { useCommonStore } from "../../stores/common";
 export default {
   components: {
     NForm,
@@ -36,6 +38,7 @@ export default {
   emits: ["closeTaskForm", "updateProject"],
   setup(props, ctx) {
     const task = useTaskStore()
+    const common = useCommonStore()
     const {tags} = storeToRefs(task)
     const autoCompleteInstRef = ref(null);
     const inputValueRef = ref("");
@@ -75,16 +78,23 @@ export default {
         if (newTask.value.name == null || newTask.value.name == null) {
           message.error("Fill the task name.");
         } else {
-          console.log(newTask.value);
+          common.setLoading(true)
           addTask(
             newTask.value.name,
             task.currentProject.id,
             newTask.value.description,
             newTask.value.deadline
           )
-          .then(() => {
+          .then((response) => {
+            newTask.value.tags.forEach(tag => {
+              addTag(
+                task.tags.filter(t => t.name == tag)[0].id,
+                response.data.id
+              )
+            })
             ctx.emit("updateProject")
             ctx.emit("closeTaskForm")
+            common.setLoading(false)
           })
         }
       },

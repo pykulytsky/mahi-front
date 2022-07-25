@@ -13,7 +13,7 @@ const getTasksByProject = (
   limit = 100,
   order_by = "is_done",
   desc = false
-) => http.get("/tasks/project/" + projectID, {
+) => http.get("/projects/" + projectID + "/tasks", {
   params: {
     skip,
     limit,
