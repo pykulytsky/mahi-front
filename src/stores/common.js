@@ -16,8 +16,8 @@ export const useCommonStore = defineStore({
     _siderIsExpanded: false,
     _errorMessage: null,
     _currentTheme: null,
-    _disableHeader: ['/login', '/register', '/reset-password'],
-    _disableSidebar: ['/', '/login', '/register', '/reset-password'],
+    _disableHeader: ['/login', '/register', '/reset-password', '/app'],
+    _disableSidebar: ['/', '/login', '/register', '/reset-password', '/app'],
     _disableFooter: [''],
     _menuItems: [
 

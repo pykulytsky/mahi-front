@@ -8,6 +8,7 @@ import Project from "../views/tasks/Project.vue"
 import Tags from "../views/tasks/Tags.vue"
 import Today from "../views/tasks/Today.vue"
 import Calendar from "../views/tasks/Calendar.vue"
+import AppHome from "../views/AppHome.vue"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -34,31 +35,32 @@ const router = createRouter({
     },
     {
       path: '/app',
-      
+      component: AppHome,
+      name: "app-home",
     },
     {
-      path: '/dashboard',
+      path: '/app/dashboard',
       name: 'dashboard',
       component: Dashboard
     },
 
     {
-      path: '/project/:id',
+      path: '/app/project/:id',
       component: Project,
       name: 'project'
     },
     {
-      path: '/tags',
+      path: '/app/tags',
       component: Tags,
       name: 'tags'
     },
     {
-      path: '/today',
+      path: '/app/today',
       component: Today,
       name: 'today'
     },
     {
-      path: '/calendar',
+      path: '/app/calendar',
       component: Calendar,
       name: 'calendar'
     },

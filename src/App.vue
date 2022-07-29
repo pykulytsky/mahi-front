@@ -85,7 +85,7 @@ export default {
     const path = computed(() => route.path);
     const common = useCommonStore();
     const task = useTaskStore();
-    const { isLoading, currenttheme } = storeToRefs(common);
+    const { isLoading, currentTheme } = storeToRefs(common);
     const { projects } = storeToRefs(task);
     const searchInputEnabled = ref(false);
     const searchInput = ref(null);
@@ -262,9 +262,9 @@ export default {
       },
       handleSiderRoute(key, item) {
         if (Number.isInteger(key)) {
-          router.push("/project/" + key);
+          router.push("/app/project/" + key);
         } else {
-          router.push("/" + key);
+          router.push("/app/" + key);
         }
       },
     };
@@ -361,7 +361,7 @@ export default {
             </div>
           </n-layout-header>
           <n-scrollbar
-            v-if="!(['/', '/login', '/register', '/reset-password'].includes(path))"
+            v-if="!(['/', '/login', '/register', '/reset-password', '/app'].includes(path))"
             @scroll="onScroll"
             trigger="hover"
             style="max-height: 95vh"
@@ -386,7 +386,7 @@ export default {
             />
           </n-layout-header> -->
 
-          <n-layout-content v-if="['/', '/login', '/register', '/reset-password'].includes(path)" @on-scroll="onScroll">
+          <n-layout-content v-if="['/', '/login', '/register', '/reset-password', '/app'].includes(path)" @on-scroll="onScroll">
             <RouterView v-slot="{ Component }">
               <Transition name="fade">
                 <component :is="Component" />

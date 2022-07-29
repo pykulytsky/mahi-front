@@ -152,7 +152,7 @@ export default {
                 " was successfully deleted"
             );
             task.fetchProjects();
-            router.push("/today");
+            router.push("/app/today");
             common.setLoading(true);
           });
         },

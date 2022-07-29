@@ -1,15 +1,12 @@
 <script>
 import { NGradientText, NButton, NSpace } from "naive-ui";
-import hand from "../assets/lottie/hand.json";
 import { onMounted, onUnmounted } from "vue";
-import VVanta from "vue-vanta/src/Vanta.vue";
 import { useElementVisibility } from '@vueuse/core'
 import { ref } from "vue";
 import {useCommonStore} from "../stores/common"
 export default {
   components: {
     NGradientText,
-    VVanta,
     NButton,
     NSpace
   },
@@ -90,27 +87,11 @@ export default {
       common.setTheme("dark")
       document.documentElement.style.overflow = "hidden";
     });
-    const vantaOptions = {
-      mouseControls: true,
-      touchControls: true,
-      minHeight: 750.0,
-      minWidth: 200.0,
-      scale: 1.0,
-      scaleMobile: 1.0,
-      blurFactor: 0.73,
-      highlightColor: 0x965a04,
-      midtoneColor: 0xca832e,
-      lowlightColor: 0x7f3811,
-      speed: 2.0,
-      zoom: 1.1,
-    };
     const featuresIsVisible = ref(false);
     return {
       featuresIsVisible,
-      vantaOptions,
       pauseAnimation,
       direction,
-      hand,
       arrowRef,
       arrowRotageDeg,
       cardRef,

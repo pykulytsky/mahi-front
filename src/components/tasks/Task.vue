@@ -135,7 +135,7 @@ export default {
       </n-tag>
       <n-tag
         class="detail-tag"
-        @click="router.push('/day/' + task.deadline)"
+        @click="router.push('/app/day/' + task.deadline)"
         size="small"
         type="error"
         bordered
@@ -151,7 +151,7 @@ export default {
       </n-tag>
       <n-tag
         class="detail-tag"
-        @click="router.push('/tag/' + tag.name)"
+        @click="router.push('/app/tag/' + tag.name)"
         size="small"
         v-for="tag in task.tags"
         :key="tag.name"
