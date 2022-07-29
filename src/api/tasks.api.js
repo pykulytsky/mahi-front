@@ -1,10 +1,11 @@
 import http from "./axios"
 
-const addTask = (name, projectID, description, deadline) => http.post("/tasks/", {
+const addTask = (name, projectID, description, deadline, priority) => http.post("/tasks/", {
     name,
     project_id: projectID,
     description,
-    deadline
+    deadline,
+    priority
 })
 
 const getTasksByProject = (

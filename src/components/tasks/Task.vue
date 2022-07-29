@@ -16,7 +16,7 @@ import {
   CalendarClearOutline,
 } from "@vicons/ionicons5";
 import { useCommonStore } from "../../stores/common";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useMq } from "vue3-mq";
 export default {
@@ -45,6 +45,16 @@ export default {
     const descriptionIsShown = ref(false);
     const mq = useMq();
     const router = useRouter();
+    const taskPriorityType = computed(() => {
+      switch(props.task.priority) {
+        case 'VERY HIGH':
+          return 'error'
+        case 'HIGH':
+          return 'warning'
+        default:
+          return 'default'
+      }
+    })
     return {
       taskActions,
       taskActionsIsShown,
@@ -52,6 +62,7 @@ export default {
       descriptionIsShown,
       mq,
       router,
+      taskPriorityType,
       CalendarClearOutline,
       onMouseEnter() {
         taskActionsIsShown.value = true;
@@ -68,7 +79,7 @@ export default {
 
 <template>
   <div
-    :class="common.currentTheme == 'light' ? 'task' : 'task-dark'"
+    :class="{'task': common.currentTheme == 'light', 'task-dark': common.currentTheme == 'dark'}"
     @mouseenter="onMouseEnter"
     @mouseleave="onMouseLeave"
     @contextmenu.prevent="$emit('showTaskDetails', task)"
@@ -114,14 +125,13 @@ export default {
     >
     <n-space id="task-tags">
       <n-tag
-        class="detail-tag"
-        @click="router.push('/tag/' + tag.name)"
+        style="padding: 0 7px 0 9px"
+        v-if="task.priority"
         size="small"
-        v-for="tag in task.tags"
-        :key="tag.name"
-        :type="tag.color"
+        :type="taskPriorityType"
+        :bordered="false"
       >
-        {{ tag.name }}
+        !
       </n-tag>
       <n-tag
         class="detail-tag"
@@ -139,6 +149,17 @@ export default {
           <n-icon :component="CalendarClearOutline" />
         </template>
       </n-tag>
+      <n-tag
+        class="detail-tag"
+        @click="router.push('/tag/' + tag.name)"
+        size="small"
+        v-for="tag in task.tags"
+        :key="tag.name"
+        :type="tag.color"
+      >
+        {{ tag.name }}
+      </n-tag>
+
     </n-space>
     <!-- <n-collapse>
       <n-collapse-item title="Description">

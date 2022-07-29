@@ -38,7 +38,7 @@ import {
   CalendarOutline,
   CalendarNumberOutline,
 } from "@vicons/ionicons5";
-import { User as UserIcon } from "@vicons/tabler";
+import { User as UserIcon, Sun, Moon } from "@vicons/tabler";
 import { useCommonStore } from "./stores/common";
 import { useTaskStore } from "./stores/task";
 import AppProvider from "./app.provider.vue";
@@ -76,6 +76,8 @@ export default {
     SearchOutline,
     UserIcon,
     NDivider,
+    Sun,
+    Moon
   },
 
   setup() {
@@ -83,7 +85,7 @@ export default {
     const path = computed(() => route.path);
     const common = useCommonStore();
     const task = useTaskStore();
-    const { isLoading } = storeToRefs(common);
+    const { isLoading, currenttheme } = storeToRefs(common);
     const { projects } = storeToRefs(task);
     const searchInputEnabled = ref(false);
     const searchInput = ref(null);
@@ -309,6 +311,7 @@ export default {
                   <home-icon />
                 </n-icon>
               </n-button>
+
             </div>
             <div id="navbar-right">
               <n-button
@@ -343,17 +346,27 @@ export default {
                   <notifications-outline />
                 </n-icon>
               </n-button>
+              <n-button
+                @click="handleChange(common.currentTheme == 'light')"
+                text
+                style="font-size: 1.5rem; margin-right: 15px"
+              >
+                <n-icon>
+                  <sun v-motion-slide-top v-if="common.currentTheme == 'light'" />
+                  <moon v-motion-slide-top v-else />
+                </n-icon>
+              </n-button>
               <n-avatar :src="avatar" color="#E28163FF" id="navbar-avatar" round :size="30">
               </n-avatar>
             </div>
           </n-layout-header>
           <n-scrollbar
-            v-if="path !== '/'"
+            v-if="!(['/', '/login', '/register', '/reset-password'].includes(path))"
             @scroll="onScroll"
             trigger="hover"
             style="max-height: 95vh"
           >
-            <n-layout-content @on-scroll="onScroll">
+            <n-layout-content>
               <RouterView v-slot="{ Component }">
                 <Transition name="fade">
                   <component :is="Component" />
@@ -373,7 +386,7 @@ export default {
             />
           </n-layout-header> -->
 
-          <n-layout-content v-if="path == '/'" @on-scroll="onScroll">
+          <n-layout-content v-if="['/', '/login', '/register', '/reset-password'].includes(path)" @on-scroll="onScroll">
             <RouterView v-slot="{ Component }">
               <Transition name="fade">
                 <component :is="Component" />

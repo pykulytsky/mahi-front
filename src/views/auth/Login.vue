@@ -104,7 +104,9 @@ export default {
 </template>
 <style scoped>
 .wrapper {
-  height: 95vh;
+  height: 100vh;
+  background: url("../../assets/login-bg.png");
+  background-size: cover;
 }
 .login {
   position: absolute;

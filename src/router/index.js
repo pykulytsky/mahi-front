@@ -18,11 +18,6 @@ const router = createRouter({
       component: HomeView
     },
     {
-      path: '/dashboard',
-      name: 'dashboard',
-      component: Dashboard
-    },
-    {
       path: '/login',
       name: 'login',
       component: Login
@@ -37,6 +32,16 @@ const router = createRouter({
       name: 'resetPassword',
       component: ResetPassword
     },
+    {
+      path: '/app',
+      
+    },
+    {
+      path: '/dashboard',
+      name: 'dashboard',
+      component: Dashboard
+    },
+
     {
       path: '/project/:id',
       component: Project,

@@ -16,6 +16,7 @@ import {
   useLoadingBar,
   useMessage,
   useDialog,
+  NSkeleton
 } from "naive-ui";
 import { VuemojiPicker } from "vuemoji-picker";
 import {
@@ -38,6 +39,7 @@ import { storeToRefs } from "pinia";
 import { updateTask, deleteTask } from "../../api/tasks.api";
 import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 import { updateProject, deleteProject } from "../../api/projects.api";
+import { useElementVisibility } from '@vueuse/core'
 export default {
   components: {
     NPageHeader,
@@ -63,6 +65,7 @@ export default {
     TodoCreateForm,
     TaskEdit,
     AddCircle,
+    NSkeleton
   },
   setup() {
     const emoji = ref(null);
@@ -82,6 +85,8 @@ export default {
     const router = useRouter();
     const message = useMessage();
     const dialog = useDialog();
+    const addBtnRef = ref(null)
+    const addBtnIsVisible = useElementVisibility(addBtnRef)
 
     const filler = computed(() => {
       let choices = [Empty1, Empty2, Empty3];
@@ -174,6 +179,8 @@ export default {
       route,
       handleUpdateProject,
       handleDeleteProject,
+      addBtnRef,
+      addBtnIsVisible,
       handleBack() {},
       showTaskDetails(task) {
         currentTask.value = task;
@@ -265,6 +272,9 @@ export default {
           common.setLoading(false);
         });
       },
+      handleButtonScroll(event) {
+        console.log(event)
+      }
     };
   },
 };
@@ -276,6 +286,7 @@ export default {
         <h1 v-if="task.currentProject !== null" id="project-title">
           {{ task.currentProject.name }}
         </h1>
+        <n-skeleton height="40px" v-else></n-skeleton>
       </template>
       <template #header>
         <n-breadcrumb>
@@ -353,9 +364,11 @@ export default {
     <n-divider />
     <div class="project" v-if="tasksLoaded">
       <n-button
+        ref="addBtnRef"
         v-motion-slide-top
         v-if="currentProject.is_editable && !taskFormIsShown"
         @click="taskFormIsShown = true"
+        @scroll="handleButtonScroll"
         :style="{
           marginBottom: '15px',
         }"

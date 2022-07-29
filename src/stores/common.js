@@ -45,6 +45,13 @@ export const useCommonStore = defineStore({
     setSiderVisability(siderState) {
       this._siderIsExpanded = siderState
       localStorage.setItem("siderIsShown", siderState)
+    },
+    switchTheme() {
+      if (this._currentTheme == 'light') {
+        this.setTheme("dark")
+      } else {
+        this.setTheme("light")
+      }
     }
   }
 })

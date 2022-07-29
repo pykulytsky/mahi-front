@@ -1,5 +1,5 @@
 <script>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import {
   NForm,
   NFormItem,
@@ -11,12 +11,19 @@ import {
   NSpace,
   NTooltip,
   useMessage,
-  NDatePicker
+  NDatePicker,
+  NPopconfirm,
+  NSlider
 } from "naive-ui";
-import { CalendarOutline, AlarmOutline, PricetagOutline } from "@vicons/ionicons5";
+import {
+  CalendarOutline,
+  AlarmOutline,
+  PricetagOutline,
+} from "@vicons/ionicons5";
+import { ExclamationMark } from "@vicons/tabler";
 import { storeToRefs } from "pinia";
 import { addTask } from "../../api/tasks.api";
-import { addTag } from "../../api/tags.api"
+import { addTag } from "../../api/tags.api";
 import { useTaskStore } from "../../stores/task";
 import { useCommonStore } from "../../stores/common";
 export default {
@@ -33,23 +40,47 @@ export default {
     CalendarOutline,
     AlarmOutline,
     NTooltip,
-    NDatePicker
+    NDatePicker,
+    ExclamationMark,
+    NPopconfirm,
+    NSlider
   },
   emits: ["closeTaskForm", "updateProject"],
   setup(props, ctx) {
-    const task = useTaskStore()
-    const common = useCommonStore()
-    const {tags} = storeToRefs(task)
+    const task = useTaskStore();
+    const common = useCommonStore();
+    const { tags } = storeToRefs(task);
     const autoCompleteInstRef = ref(null);
     const inputValueRef = ref("");
     const message = useMessage();
-    const datePickerIsShown = ref(false)
+    const datePickerIsShown = ref(false);
+    const priority = ref(null)
     const newTask = ref({
       name: null,
       description: null,
       tags: [],
       deadline: null,
+      priority: null
     });
+
+    watch(priority, (value) => {
+      switch(value) {
+        case 0:
+          newTask.value.priority = "LOW"
+          break;
+        case 33:
+          newTask.value.priority = "NORMAL"
+          break;
+        case 66:
+          newTask.value.priority = "HIGH"
+          break;
+        case 100:
+          newTask.value.priority = "VERY HIGH"
+          break;
+      }
+      console.log(newTask.value.priority)
+    })
+
     return {
       autoCompleteInstRef,
       newTask,
@@ -57,17 +88,24 @@ export default {
       tags,
       datePickerIsShown,
       inputValue: inputValueRef,
+      prioritySteps: {
+        0: "Low",
+        33: "Normal",
+        66: "High",
+        100: "Very high"
+      },
+      priority,
       options: computed(() => {
         if (inputValueRef.value === "") {
-          return tags.value.map(tag => {
-            return tag.name
+          return tags.value.map((tag) => {
+            return tag.name;
           });
         }
-        return tags.value.filter((option) =>
-          option.name.includes(inputValueRef.value)
-        ).map(tag => {
-          return tag.name
-        });
+        return tags.value
+          .filter((option) => option.name.includes(inputValueRef.value))
+          .map((tag) => {
+            return tag.name;
+          });
       }),
       activate() {
         setTimeout(() => {
@@ -78,24 +116,24 @@ export default {
         if (newTask.value.name == null || newTask.value.name == null) {
           message.error("Fill the task name.");
         } else {
-          common.setLoading(true)
+          common.setLoading(true);
           addTask(
             newTask.value.name,
             task.currentProject.id,
             newTask.value.description,
-            newTask.value.deadline
-          )
-          .then((response) => {
-            newTask.value.tags.forEach(tag => {
+            newTask.value.deadline,
+            newTask.value.priority,
+          ).then((response) => {
+            newTask.value.tags.forEach((tag) => {
               addTag(
-                task.tags.filter(t => t.name == tag)[0].id,
+                task.tags.filter((t) => t.name == tag)[0].id,
                 response.data.id
-              )
-            })
-            ctx.emit("updateProject")
-            ctx.emit("closeTaskForm")
-            common.setLoading(false)
-          })
+              );
+            });
+            ctx.emit("updateProject");
+            ctx.emit("closeTaskForm");
+            common.setLoading(false);
+          });
         }
       },
     };
@@ -156,7 +194,7 @@ export default {
         </n-dynamic-tags>
         <n-tooltip trigger="hover" v-if="!datePickerIsShown">
           <template #trigger>
-            <n-button @click="datePickerIsShown = true" strong secondary circle >
+            <n-button @click="datePickerIsShown = true" strong secondary circle>
               <template #icon>
                 <n-icon>
                   <calendar-outline />
@@ -166,7 +204,14 @@ export default {
           </template>
           Add deadline
         </n-tooltip>
-        <n-date-picker v-motion-slide-bottom size="small" v-if="datePickerIsShown" v-model:formatted-value="newTask.deadline" type="date" value-format="yyyy-MM-dd" />
+        <n-date-picker
+          v-motion-slide-bottom
+          size="small"
+          v-if="datePickerIsShown"
+          v-model:formatted-value="newTask.deadline"
+          type="date"
+          value-format="yyyy-MM-dd"
+        />
         <n-tooltip trigger="hover">
           <template #trigger>
             <n-button strong secondary circle>
@@ -179,6 +224,26 @@ export default {
           </template>
           Add reminder
         </n-tooltip>
+        <n-popconfirm :show-icon="false" :positive-text="null" :negative-text="null">
+          <template #trigger>
+        <n-tooltip trigger="hover">
+          <template #trigger>
+            <n-button strong secondary circle>
+              <template #icon>
+                <n-icon>
+                  <exclamation-mark />
+                </n-icon>
+              </template>
+            </n-button>
+          </template>
+          Add priority
+        </n-tooltip>
+          </template>
+            <n-space vertical style="width: 250px; margin-right: 10px">
+              <n-slider step="mark" :tooltip="false" v-model:value="priority" :marks="prioritySteps" />
+            </n-space>
+        </n-popconfirm>
+
       </div>
 
       <div id="task-input-bottom-right">
@@ -190,7 +255,12 @@ export default {
             type="error"
             >Cancel</n-button
           >
-          <n-button :disabled="newTask.name == '' || newTask.name == null" @click="handleAddTask" strong secondary type="success"
+          <n-button
+            :disabled="newTask.name == '' || newTask.name == null"
+            @click="handleAddTask"
+            strong
+            secondary
+            type="success"
             >Add task</n-button
           >
         </n-space>

@@ -195,6 +195,7 @@ onBeforeUpdate(() => {
   flex-direction: column;
   justify-content: center;
   gap: 20px;
+  font-family: "Josefin Sans";
 }
 .code-input {
   display: flex;

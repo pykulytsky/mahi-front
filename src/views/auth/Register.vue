@@ -170,9 +170,9 @@ export default {
 <template>
   <main>
     <div class="wrapper">
-      <img id="register-blob1" src="../../assets/abstract/abstract1.png" alt="" width="500" height="500">
+      <!-- <img id="register-blob1" src="../../assets/abstract/abstract1.png" alt="" width="500" height="500">
       <img id="register-blob2" src="../../assets/abstract/abstract2.png" alt="" width="500" height="500">
-      <img id="register-blob3" src="../../assets/abstract/abstract3.png" alt="" width="500" height="500">
+      <img id="register-blob3" src="../../assets/abstract/abstract3.png" alt="" width="500" height="500"> -->
       <div :class="mq.lgPlus? 'register': 'register-small'">
         <n-card title="Create an account">
           <n-steps
@@ -230,8 +230,8 @@ export default {
           </n-form>
 
           <n-space :justify="currentStep == 1 ? 'end' : 'space-between'">
-            <n-button @click="prev" v-if="currentStep !== 1">Previous</n-button>
-            <n-button v-if="currentStep !== 3" @click="next">Next</n-button>
+            <n-button type="primary" @click="prev" v-if="currentStep !== 1">Previous</n-button>
+            <n-button type="primary" v-if="currentStep !== 3" @click="next">Next</n-button>
             <n-button type="primary" v-else @click="finish">Finish</n-button>
           </n-space>
         </n-card>
@@ -241,7 +241,9 @@ export default {
 </template>
 <style scoped>
 .wrapper {
-  height: 95vh;
+  height: 100vh;
+  background: url("../../assets/register-bg.png");
+  background-size: cover;
 }
 .register {
   position: absolute;
