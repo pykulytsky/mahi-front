@@ -105,88 +105,16 @@ export default {
 
     const isDarkTheme = ref(false);
 
+    watch(projects, (value) => {
+      if (value !== null) {
+        task.loadMenuProjects()
+      }
+    })
+
     onBeforeMount(() => {
       task.fetchProjects();
       task.fetchTags();
-      setTimeout(() => {
-        common.setLoading(true);
-        task.pinned.forEach((project) => {
-          menuOptions.value.push({
-            label: project.name,
-            key: project.id,
-            icon: () => (project.icon !== null ? project.icon : "🥥"),
-          });
-        });
-        menuOptions.value.push({
-          key: "divider-2",
-          type: "divider",
-          props: {
-            style: {
-              marginLeft: "32px",
-            },
-          },
-        });
-        let favoritesGroup = {
-          label: "Favorites",
-          key: "favorites",
-          children: [],
-        };
-        task.favorites.forEach((project) => {
-          favoritesGroup.children.push({
-            label: project.name,
-            key: project.id,
-            icon: () => (project.icon !== null ? project.icon : "🥥"),
-          });
-        });
-        menuOptions.value.push(favoritesGroup);
-        let projectsGroup = {
-          label: "Projects",
-          key: "projects",
-          children: [],
-        };
-        task.projects.forEach((project) => {
-          projectsGroup.children.push({
-            label: project.name,
-            key: project.id,
-            icon: () => (project.icon !== null ? project.icon : "🥥"),
-          });
-        });
-        menuOptions.value.push(projectsGroup);
-        common.setLoading(true);
-      }, 1);
     });
-
-    const menuOptions = ref([
-      {
-        label: "Dashboard",
-        key: "dashboard",
-        icon: renderIcon(HomeIcon),
-      },
-      {
-        label: "Today",
-        key: "today",
-        icon: renderIcon(CalendarNumberOutline),
-      },
-      {
-        label: "Calendar",
-        key: "calendar",
-        icon: renderIcon(CalendarOutline),
-      },
-      {
-        label: "Tags",
-        key: "tags",
-        icon: renderIcon(PricetagOutline),
-      },
-      {
-        key: "divider-1",
-        type: "divider",
-        props: {
-          style: {
-            marginLeft: "32px",
-          },
-        },
-      },
-    ]);
 
     onMounted(() => {
       common.setTheme(localStorage.getItem("theme"));
@@ -226,7 +154,6 @@ export default {
     return {
       darkTheme,
       theme,
-      menuOptions,
       themeOverrides,
       path,
       common,
@@ -288,7 +215,7 @@ export default {
           <n-menu
             :default-expanded-keys="['favorites', 'projects']"
             @update:value="handleSiderRoute"
-            :options="menuOptions"
+            :options="task.menuOptions"
           />
         </n-layout-sider>
         <n-layout>
