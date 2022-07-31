@@ -78,7 +78,6 @@ export default {
           newTask.value.priority = "VERY HIGH"
           break;
       }
-      console.log(newTask.value.priority)
     })
 
     return {

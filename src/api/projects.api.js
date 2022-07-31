@@ -23,7 +23,10 @@ const updateProject = (
 
 const deleteProject = (ID) => http.delete("/projects/" + ID)
 
+const fetchActivity = () => http.get("/users/me/activities")
+
 export {
     updateProject,
-    deleteProject
+    deleteProject,
+    fetchActivity
 }

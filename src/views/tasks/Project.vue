@@ -273,7 +273,6 @@ export default {
         });
       },
       handleButtonScroll(event) {
-        console.log(event)
       }
     };
   },

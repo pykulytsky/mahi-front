@@ -18,7 +18,6 @@ export default {
     const { isLoading } = storeToRefs(common);
     const { projects, tags, pinned, favorites } = storeToRefs(task);
     onMounted(() => {
-      
       if (
         !isLoading.value &&
         projects.value !== null &&
