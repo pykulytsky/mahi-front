@@ -27,6 +27,8 @@ import {
   NSpace,
   NAvatar,
   NDivider,
+  NDropdown,
+  NModal
 } from "naive-ui";
 import {
   HomeOutline as HomeIcon,
@@ -41,7 +43,9 @@ import {
 import { User as UserIcon, Sun, Moon } from "@vicons/tabler";
 import { useCommonStore } from "./stores/common";
 import { useTaskStore } from "./stores/task";
+import { useAuthStore } from "./stores/auth"
 import AppProvider from "./app.provider.vue";
+import Settings from "./components/core/Settings.vue"
 const { loadingBar } = createDiscreteApi(["loadingBar"]);
 
 export default {
@@ -77,13 +81,17 @@ export default {
     UserIcon,
     NDivider,
     Sun,
-    Moon
+    Moon,
+    NDropdown,
+    NModal,
+    Settings
   },
 
   setup() {
     const route = useRoute();
     const path = computed(() => route.path);
     const common = useCommonStore();
+    const auth = useAuthStore()
     const task = useTaskStore();
     const { isLoading, currentTheme } = storeToRefs(common);
     const { projects } = storeToRefs(task);
@@ -91,6 +99,7 @@ export default {
     const searchInput = ref(null);
     const router = useRouter();
     const avatar = new URL('./assets/avatars/55.svg', import.meta.url).href
+    const showSettings = ref(false)
 
     const theme = ref(null);
     router.beforeEach(function (to, from, next) {
@@ -156,6 +165,7 @@ export default {
       theme,
       themeOverrides,
       path,
+      auth,
       common,
       router,
       searchInput,
@@ -167,6 +177,7 @@ export default {
       PricetagOutline,
       SearchOutline,
       avatar,
+      showSettings,
       handleChange(value) {
         if (value) {
           theme.value = darkTheme;
@@ -194,6 +205,13 @@ export default {
           router.push("/app/" + key);
         }
       },
+      handleUserMenuSelect(key) {
+        switch(key) {
+          case "settings":
+            showSettings.value = true
+            break;
+        }
+      }
     };
   },
 };
@@ -283,8 +301,10 @@ export default {
                   <moon v-motion-slide-top v-else />
                 </n-icon>
               </n-button>
+              <n-dropdown @select="handleUserMenuSelect" trigger="click" :options="auth.userDropdownMenuOptions">
               <n-avatar :src="avatar" color="#E28163FF" id="navbar-avatar" round :size="30">
               </n-avatar>
+              </n-dropdown>
             </div>
           </n-layout-header>
           <n-scrollbar
@@ -327,6 +347,10 @@ export default {
           </n-layout-footer>
         </n-layout>
       </n-layout>
+
+      <n-modal :mask-closable="false" v-model:show="showSettings">
+        <settings />
+      </n-modal>
 
       <n-global-style />
     </app-provider>
