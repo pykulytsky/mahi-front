@@ -153,10 +153,10 @@ export default {
 
     const themeOverrides = {
       common: {
-        primaryColor: "#E28163FF",
-        primaryColorHover: "#E28163FF",
-        primaryColorPressed: "#E28163FF",
-        invertedColor: "#A08278FF",
+        primaryColor: "#ffa",
+        primaryColorHover: "#EED180",
+        primaryColorPressed: "#EED180",
+        invertedColor: "#EED180",
       },
     };
 
@@ -302,7 +302,7 @@ export default {
                 </n-icon>
               </n-button>
               <n-dropdown @select="handleUserMenuSelect" trigger="click" :options="auth.userDropdownMenuOptions">
-              <n-avatar :src="avatar" color="#E28163FF" id="navbar-avatar" round :size="30">
+              <n-avatar :src="avatar" color="#ffa" id="navbar-avatar" round :size="30">
               </n-avatar>
               </n-dropdown>
             </div>
@@ -367,6 +367,9 @@ export default {
   font-family: "Beatrice";
   src: url("./assets/beatrice/Beatrice Display Black.ttf") format("truetype");
 }
+* {
+  --primary-color: #ffa;
+}
 #navbar {
   backdrop-filter: blur(1px);
   height: 5vh;
@@ -387,7 +390,7 @@ export default {
   min-height: 95vh;
 }
 ::selection {
-  background: #e28163ff;
+  background: #ffa;
 }
 #home-navbar-menu {
   display: flex;

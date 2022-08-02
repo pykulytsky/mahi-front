@@ -201,7 +201,7 @@ export default {
 .task:hover,
 .task-dark:hover {
   cursor: pointer;
-  outline: 1px solid #e28163ff;
+  outline: 1px solid var(--primary-color);
   transform: scale(1.03) !important;
 }
 .task-actions {

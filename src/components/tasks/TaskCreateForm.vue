@@ -271,7 +271,7 @@ export default {
 .task-form {
   width: 75vw;
   padding: 1%;
-  border: 1px solid #e28163ff;
+  border: 1px solid var(--primary-color);
   border-radius: 5px;
 }
 #task-title-input,
