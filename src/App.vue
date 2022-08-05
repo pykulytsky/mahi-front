@@ -46,6 +46,7 @@ import { useTaskStore } from "./stores/task";
 import { useAuthStore } from "./stores/auth"
 import AppProvider from "./app.provider.vue";
 import Settings from "./components/core/Settings.vue"
+import ProjectCreateForm from "./components/tasks/ProjectCreateForm.vue"
 const { loadingBar } = createDiscreteApi(["loadingBar"]);
 
 export default {
@@ -84,7 +85,8 @@ export default {
     Moon,
     NDropdown,
     NModal,
-    Settings
+    Settings,
+    ProjectCreateForm
   },
 
   setup() {
@@ -100,6 +102,7 @@ export default {
     const router = useRouter();
     const avatar = new URL('./assets/avatars/55.svg', import.meta.url).href
     const showSettings = ref(false)
+    const showNewProject = ref(false)
 
     const theme = ref(null);
     router.beforeEach(function (to, from, next) {
@@ -114,13 +117,15 @@ export default {
 
     const isDarkTheme = ref(false);
 
-    watch(projects, (value) => {
-      if (value !== null) {
+    watch(projects, (value, oldValue) => {
+      if (value !== null && value !== oldValue) {
         task.loadMenuProjects()
       }
     })
-
     onBeforeMount(() => {
+      // auth.setToken(localStorage.getItem("token"))
+      // auth.setExp(localStorage.getItem("exp"))
+      auth.loadCurrentUser();
       task.fetchProjects();
       task.fetchTags();
     });
@@ -158,6 +163,13 @@ export default {
         primaryColorPressed: "#EED180",
         invertedColor: "#EED180",
       },
+      Switch: {
+        railColorActive: "#ffa"
+      },
+      Slider: {
+        fillColor: "#ffa",
+        fillColorHover: "#EED180"
+      }
     };
 
     return {
@@ -178,6 +190,7 @@ export default {
       SearchOutline,
       avatar,
       showSettings,
+      showNewProject,
       handleChange(value) {
         if (value) {
           theme.value = darkTheme;
@@ -202,7 +215,11 @@ export default {
         if (Number.isInteger(key)) {
           router.push("/app/project/" + key);
         } else {
-          router.push("/app/" + key);
+          if (key == "add-project") {
+            showNewProject.value = true
+          } else {
+            router.push("/app/" + key);
+          }
         }
       },
       handleUserMenuSelect(key) {
@@ -222,6 +239,7 @@ export default {
     <app-provider>
       <n-layout id="layout" has-sider>
         <n-layout-sider
+          :native-scrollbar="false"
           bordered
           collapse-mode="width"
           :collapsed-width="0"
@@ -351,6 +369,9 @@ export default {
       <n-modal :mask-closable="false" v-model:show="showSettings">
         <settings />
       </n-modal>
+      <n-modal v-model:show="showNewProject">
+        <project-create-form @closeModal="showNewProject = false" />
+      </n-modal>
 
       <n-global-style />
     </app-provider>
@@ -462,5 +483,8 @@ export default {
   animation-timing-function: linear;
   -webkit-animation-iteration-count: infinite;
   animation-iteration-count: infinite;
+}
+.n-layout-sider .n-scrollbar {
+  height: 100vh;
 }
 </style>

@@ -15,6 +15,7 @@ import {
   EllipsisVerticalOutline,
   CalendarClearOutline,
 } from "@vicons/ionicons5";
+import { ExclamationMark } from "@vicons/tabler";
 import { useCommonStore } from "../../stores/common";
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
@@ -33,6 +34,7 @@ export default {
     NTag,
     NSpace,
     CalendarClearOutline,
+    ExclamationMark,
   },
   emits: ["showTaskDetails", "changeTaskStatus"],
   props: {
@@ -40,21 +42,26 @@ export default {
   },
   setup(props) {
     const taskActions = [];
+    const themeOverrides = {
+      common: {
+        primaryColor: "#ff7373",
+      },
+    };
     const taskActionsIsShown = ref(false);
     const common = useCommonStore();
     const descriptionIsShown = ref(false);
     const mq = useMq();
     const router = useRouter();
     const taskPriorityType = computed(() => {
-      switch(props.task.priority) {
-        case 'VERY HIGH':
-          return 'error'
-        case 'HIGH':
-          return 'warning'
+      switch (props.task.priority) {
+        case "VERY HIGH":
+          return "error";
+        case "HIGH":
+          return "warning";
         default:
-          return 'default'
+          return "default";
       }
-    })
+    });
     return {
       taskActions,
       taskActionsIsShown,
@@ -63,6 +70,7 @@ export default {
       mq,
       router,
       taskPriorityType,
+      themeOverrides,
       CalendarClearOutline,
       onMouseEnter() {
         taskActionsIsShown.value = true;
@@ -70,8 +78,7 @@ export default {
       onMouseLeave() {
         taskActionsIsShown.value = false;
       },
-      handleTaskFinish() {
-      },
+      handleTaskFinish() {},
     };
   },
 };
@@ -79,13 +86,34 @@ export default {
 
 <template>
   <div
-    :class="{'task': common.currentTheme == 'light', 'task-dark': common.currentTheme == 'dark'}"
+    :class="{
+      task: common.currentTheme == 'light',
+      'task-dark': common.currentTheme == 'dark',
+    }"
+    :style="{
+      '--outline-color':
+        task.color !== null ? task.color : 'var(--primary-color)',
+    }"
     @mouseenter="onMouseEnter"
     @mouseleave="onMouseLeave"
     @contextmenu.prevent="$emit('showTaskDetails', task)"
   >
     <div class="task-title">
       <n-checkbox
+        :style="{
+          '--checkbox-color':
+            task.color !== null ? task.color : 'var(--primary-color)',
+          '--n-color-checked':
+            task.color !== null ? task.color : 'var(--primary-color)',
+          '--n-border-checked':
+            task.color !== null
+              ? `1px solid ${task.color}`
+              : '1px solid var(--primary-color)',
+          '--n-border-focus':
+            task.color !== null
+              ? `1px solid ${task.color}`
+              : '1px solid var(--primary-color)',
+        }"
         @click="$emit('changeTaskStatus', task)"
         :checked="task.is_done"
         size="large"
@@ -125,13 +153,14 @@ export default {
     >
     <n-space id="task-tags">
       <n-tag
-        style="padding: 0 7px 0 9px"
         v-if="task.priority"
         size="small"
         :type="taskPriorityType"
         :bordered="false"
       >
-        !
+        <n-icon :size="15">
+          <exclamation-mark></exclamation-mark>
+        </n-icon>
       </n-tag>
       <n-tag
         class="detail-tag"
@@ -159,7 +188,6 @@ export default {
       >
         {{ tag.name }}
       </n-tag>
-
     </n-space>
     <!-- <n-collapse>
       <n-collapse-item title="Description">
@@ -201,7 +229,7 @@ export default {
 .task:hover,
 .task-dark:hover {
   cursor: pointer;
-  outline: 1px solid var(--primary-color);
+  outline: 1px solid var(--outline-color);
   transform: scale(1.03) !important;
 }
 .task-actions {
@@ -227,6 +255,13 @@ export default {
 }
 .task-title .n-checkbox {
   align-items: baseline;
+  transition: .3s all linear;
+}
+.task-title .n-checkbox:active {
+  transform: scale(1.11);
+}
+.task-title .n-checkbox .n-checkbox-box .n-checkbox-box__border {
+  border: 2px solid var(--checkbox-color);
 }
 .description {
   padding: 0% 3%;
@@ -253,5 +288,11 @@ export default {
   white-space: nowrap;
   width: 95%;
   display: inline-block;
+}
+@media screen and (max-width: 720px) {
+  .task,
+  .task-dark {
+    width: 95vw;
+  }
 }
 </style>

@@ -4,6 +4,9 @@ import { h } from "vue";
 import { NAvatar, NText, NIcon } from "naive-ui";
 import {ChartLine, Settings} from "@vicons/tabler"
 import { LogOutOutline } from "@vicons/ionicons5"
+import { useTaskStore } from "./task";
+
+import * as jose from 'jose'
 
 function renderCustomHeader() {
   return h(
@@ -46,6 +49,7 @@ export const useAuthStore = defineStore({
   state: () => ({
     _user: null,
     _token: null,
+    _exp: null,
     _userDropdownMenuOptions: [
           {
             key: "header",
@@ -82,6 +86,7 @@ export const useAuthStore = defineStore({
     },
     user: (state) => state._user,
     token: (state) => state._token,
+    exp: (state) => state._exp,
     userDropdownMenuOptions: (state) => state._userDropdownMenuOptions,
   },
   actions: {
@@ -92,24 +97,32 @@ export const useAuthStore = defineStore({
       this._token = token;
       localStorage.setItem("token", token);
     },
+    setExp(exp) {
+      this._exp = exp
+      localStorage.setItem("exp", exp)
+    },
     signIn(email, password) {
+      const task = useTaskStore()
       let formData = new FormData();
       formData.append("username", email);
       formData.append("password", password);
-
       http
         .post("/access-token", formData, {
           "Content-Type": "application/x-www-form-urlencoded",
         })
         .then((response) => {
           this.setToken(response.data.access_token);
+          this.setExp(jose.decodeJwt(response.data.access_token).exp)
+          task.fetchProjects()
           this.loadCurrentUser();
         });
     },
     loadCurrentUser() {
       http.get("/users/me/").then((userData) => {
         this.setUser(userData.data);
-      });
+        return true
+      })
+      return false
     },
   },
 });

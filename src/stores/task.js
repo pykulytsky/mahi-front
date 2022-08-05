@@ -21,6 +21,7 @@ import {
   CalendarNumberOutline,
   CalendarOutline,
   PricetagOutline,
+  AddOutline
 } from "@vicons/ionicons5";
 import { Lock, LockOpen } from "@vicons/tabler";
 const renderIcon = (icon) => {
@@ -242,8 +243,8 @@ export const useTaskStore = defineStore({
       });
     },
   loadMenuProjects() {
-    if (this._menuOptions.length > 5) {
-      this._menuOptions.splice(0, 5);
+    if (this._menuOptions.length > 4) {
+      this._menuOptions.splice(5, this._menuOptions.length+1);
     }
 
     this.pinned.forEach((project) => {
@@ -278,7 +279,13 @@ export const useTaskStore = defineStore({
     let projectsGroup = {
       label: "Projects",
       key: "projects",
-      children: [],
+      children: [
+        {
+          label: "Add Project",
+          key: "add-project",
+          icon: renderIcon(AddOutline)
+        }
+      ],
     };
     this.projects.forEach((project) => {
       projectsGroup.children.push({

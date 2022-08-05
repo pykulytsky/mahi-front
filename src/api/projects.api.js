@@ -25,8 +25,27 @@ const deleteProject = (ID) => http.delete("/projects/" + ID)
 
 const fetchActivity = () => http.get("/users/me/activities")
 
+const createProject = (
+    {
+        name,
+        description,
+        color,
+        icon,
+        isFavorite,
+        isPinned
+    }
+) => http.post("/projects", {
+    name,
+    description,
+    accent_color: color,
+    icon,
+    is_favorite: isFavorite,
+    is_pinned: isPinned
+})
+
 export {
     updateProject,
     deleteProject,
-    fetchActivity
+    fetchActivity,
+    createProject
 }

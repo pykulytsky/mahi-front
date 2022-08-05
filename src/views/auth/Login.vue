@@ -14,6 +14,10 @@ import { ref } from "vue";
 import { KeyOutline, MailOutline} from "@vicons/ionicons5";
 import { useMq } from "vue3-mq";
 import { useAuthStore } from "../../stores/auth";
+import {useRouter} from "vue-router"
+import { signIn } from "../../api/auth.api"
+import * as jose from 'jose'
+import { useTaskStore } from "../../stores/task";
 export default {
   components: {
     NCard,
@@ -28,8 +32,10 @@ export default {
   setup() {
     const formRef = ref(null);
     const message = useMessage();
+    const router = useRouter()
     const auth = useAuthStore()
     const mq = useMq()
+    const task = useTaskStore()
     const loginModel = ref({
       email: "",
       password: "",
@@ -57,7 +63,16 @@ export default {
         loginModel.value.password = value;
       },
       handleSignIn() {
-        auth.signIn(loginModel.value.email, loginModel.value.password)
+        let formData = new FormData();
+        formData.append("username", loginModel.value.email);
+        formData.append("password", loginModel.value.password);
+        signIn(formData).then(response => {
+          auth.setToken(response.data.access_token);
+          auth.setExp(jose.decodeJwt(response.data.access_token).exp)
+          task.fetchProjects()
+          auth.loadCurrentUser()
+          router.push("/app/today")
+        })
       }
     };
   },

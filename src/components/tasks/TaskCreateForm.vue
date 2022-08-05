@@ -13,12 +13,13 @@ import {
   useMessage,
   NDatePicker,
   NPopconfirm,
-  NSlider
+  NSlider,
 } from "naive-ui";
 import {
   CalendarOutline,
   AlarmOutline,
   PricetagOutline,
+  ColorFilterOutline,
 } from "@vicons/ionicons5";
 import { ExclamationMark } from "@vicons/tabler";
 import { storeToRefs } from "pinia";
@@ -26,6 +27,7 @@ import { addTask } from "../../api/tasks.api";
 import { addTag } from "../../api/tags.api";
 import { useTaskStore } from "../../stores/task";
 import { useCommonStore } from "../../stores/common";
+import ColorPicker from "../core/ColorPicker.vue";
 export default {
   components: {
     NForm,
@@ -43,7 +45,9 @@ export default {
     NDatePicker,
     ExclamationMark,
     NPopconfirm,
-    NSlider
+    NSlider,
+    ColorPicker,
+    ColorFilterOutline,
   },
   emits: ["closeTaskForm", "updateProject"],
   setup(props, ctx) {
@@ -54,31 +58,32 @@ export default {
     const inputValueRef = ref("");
     const message = useMessage();
     const datePickerIsShown = ref(false);
-    const priority = ref(null)
+    const priority = ref(null);
     const newTask = ref({
       name: null,
       description: null,
       tags: [],
       deadline: null,
-      priority: null
+      priority: null,
+      color: null,
     });
 
     watch(priority, (value) => {
-      switch(value) {
+      switch (value) {
         case 0:
-          newTask.value.priority = "LOW"
+          newTask.value.priority = "LOW";
           break;
         case 33:
-          newTask.value.priority = "NORMAL"
+          newTask.value.priority = "NORMAL";
           break;
         case 66:
-          newTask.value.priority = "HIGH"
+          newTask.value.priority = "HIGH";
           break;
         case 100:
-          newTask.value.priority = "VERY HIGH"
+          newTask.value.priority = "VERY HIGH";
           break;
       }
-    })
+    });
 
     return {
       autoCompleteInstRef,
@@ -91,7 +96,7 @@ export default {
         0: "Low",
         33: "Normal",
         66: "High",
-        100: "Very high"
+        100: "Very high",
       },
       priority,
       options: computed(() => {
@@ -122,6 +127,7 @@ export default {
             newTask.value.description,
             newTask.value.deadline,
             newTask.value.priority,
+            newTask.value.color
           ).then((response) => {
             newTask.value.tags.forEach((tag) => {
               addTag(
@@ -204,6 +210,7 @@ export default {
           Add deadline
         </n-tooltip>
         <n-date-picker
+          style="width: 11vw;"
           v-motion-slide-bottom
           size="small"
           v-if="datePickerIsShown"
@@ -223,26 +230,65 @@ export default {
           </template>
           Add reminder
         </n-tooltip>
-        <n-popconfirm :show-icon="false" :positive-text="null" :negative-text="null">
+        <n-popconfirm
+          :show-icon="false"
+          :positive-text="null"
+          :negative-text="null"
+        >
           <template #trigger>
-        <n-tooltip trigger="hover">
-          <template #trigger>
-            <n-button strong secondary circle>
-              <template #icon>
-                <n-icon>
-                  <exclamation-mark />
-                </n-icon>
+            <n-tooltip trigger="hover">
+              <template #trigger>
+                <n-button strong secondary circle>
+                  <template #icon>
+                    <n-icon>
+                      <exclamation-mark />
+                    </n-icon>
+                  </template>
+                </n-button>
               </template>
-            </n-button>
+              Add priority
+            </n-tooltip>
           </template>
-          Add priority
-        </n-tooltip>
-          </template>
-            <n-space vertical style="width: 250px; margin-right: 10px">
-              <n-slider step="mark" :tooltip="false" v-model:value="priority" :marks="prioritySteps" />
-            </n-space>
+          <n-space vertical style="width: 250px; margin-right: 10px">
+            <n-slider
+              step="mark"
+              :tooltip="false"
+              v-model:value="priority"
+              :marks="prioritySteps"
+            />
+          </n-space>
         </n-popconfirm>
-
+        <n-popconfirm
+          :show-icon="false"
+          :positive-text="null"
+          :negative-text="null"
+        >
+          <template #trigger>
+            <n-tooltip trigger="hover">
+              <template #trigger>
+                <n-button strong secondary circle v-if="newTask.color == null">
+                  <template #icon>
+                    <n-icon>
+                      <color-filter-outline />
+                    </n-icon>
+                  </template>
+                </n-button>
+                <div
+                  v-else
+                  :style="{
+                    cursor: 'pointer',
+                    width: '15px',
+                    height: '15px',
+                    borderRadius: '50%',
+                    backgroundColor: newTask.color
+                  }"
+                ></div>
+              </template>
+              Set color
+            </n-tooltip>
+          </template>
+          <color-picker v-model:value="newTask.color" />
+        </n-popconfirm>
       </div>
 
       <div id="task-input-bottom-right">
@@ -294,5 +340,10 @@ export default {
   display: flex;
   gap: 15px;
   align-items: center;
+}
+@media screen and (max-width: 720px) {
+  .task-form {
+    width: 95vw;
+  }
 }
 </style>

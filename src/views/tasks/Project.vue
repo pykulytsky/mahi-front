@@ -29,17 +29,16 @@ import { Pin, PinnedOff } from "@vicons/tabler";
 import { useTaskStore } from "../../stores/task";
 import { useCommonStore } from "../../stores/common";
 import Task from "../../components/tasks/Task.vue";
-import Empty1 from "../../assets/lottie/empty1.json";
-import Empty2 from "../../assets/lottie/empty2.json";
-import Empty3 from "../../assets/lottie/empty3.json";
 import draggable from "vuedraggable";
 import TodoCreateForm from "../../components/tasks/TaskCreateForm.vue";
+import TaskMoveDialog from "../../components/tasks/TaskMoveDialog.vue"
 import TaskEdit from "../../components/tasks/TaskEdit.vue";
 import { storeToRefs } from "pinia";
 import { updateTask, deleteTask } from "../../api/tasks.api";
 import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 import { updateProject, deleteProject } from "../../api/projects.api";
 import { useElementVisibility } from '@vueuse/core'
+import ColorPicker from "../../components/core/ColorPicker.vue"
 export default {
   components: {
     NPageHeader,
@@ -65,7 +64,9 @@ export default {
     TodoCreateForm,
     TaskEdit,
     AddCircle,
-    NSkeleton
+    NSkeleton,
+    TaskMoveDialog,
+    ColorPicker
   },
   setup() {
     const emoji = ref(null);
@@ -87,8 +88,14 @@ export default {
     const dialog = useDialog();
     const addBtnRef = ref(null)
     const addBtnIsVisible = useElementVisibility(addBtnRef)
+    const taskMoveModal = ref(false)
+    const editedTags = ref([])
 
-    const filler = computed(() => {
+    const projectThemeOverrides = ref({
+      common: "#aaaa"
+    })
+
+    const randomImage = computed(() => {
       let choices = [Empty1, Empty2, Empty3];
       let index = Math.floor(Math.random() * choices.length);
       return choices[index];
@@ -96,6 +103,7 @@ export default {
 
     onBeforeMount(() => {
       task.fetchProject(route.params.id);
+      // console.log(new URL("../../assets/pixeltrue/pixeltrue-icons-receipt-1 1.svg", import.meta.url).href)
     });
 
     onBeforeRouteUpdate(() => {
@@ -169,7 +177,7 @@ export default {
       taskDetailIsShown,
       placement,
       activate,
-      filler,
+      randomImage,
       isFavorite,
       isPinned,
       tasksLoaded,
@@ -181,6 +189,9 @@ export default {
       handleDeleteProject,
       addBtnRef,
       addBtnIsVisible,
+      projectThemeOverrides,
+      taskMoveModal,
+      editedTags,
       handleBack() {},
       showTaskDetails(task) {
         currentTask.value = task;
@@ -255,7 +266,8 @@ export default {
           currentTask.value.name,
           currentTask.value.description,
           currentTask.value.deadline,
-          currentTask.value.is_done
+          currentTask.value.is_done,
+          currentTask.value.color,
         ).then(() => {
           task.fetchProject(route.params.id);
           taskDetailIsShown.value = false;
@@ -273,6 +285,11 @@ export default {
         });
       },
       handleButtonScroll(event) {
+      },
+      onCloseTaskMove() {
+        taskMoveModal.value = false
+        taskDetailIsShown.value = false
+        task.fetchProject(route.params.id)
       }
     };
   },
@@ -398,14 +415,14 @@ export default {
         :delay="i * 100"
         :key="i"
       ></task-item>
-
-      <Vue3Lottie
+      <img
         v-if="currentTasks.length == 0"
-        id="project-no-data"
-        :animationData="filler"
-        :width="500"
-        :height="500"
+        class="project-no-data"
+        src="../../assets/pixeltrue/pixeltrue-icons-receipt-1 1.svg"
+        :width="350"
+        :height="350"
       />
+      <p v-if="currentTasks.length == 0" style="color: #ffa" class="project-no-data"><i>There is too empty! How about plan your next travel?</i></p>
     </div>
     <n-drawer
       :style="{
@@ -418,11 +435,14 @@ export default {
       :height="100"
     >
       <n-drawer-content title="Edit task" id="edit-task-drawer">
-        <task-edit :task="currentTask" />
+        <task-edit :tags="editedTags" :task="currentTask" />
         <template #footer>
           <n-space>
             <n-button @click="handleDeleteTask" type="error"
               >Delete Task</n-button
+            >
+            <n-button @click="taskMoveModal = true" type="warning"
+              >Move Task</n-button
             >
           </n-space>
           <n-space>
@@ -445,6 +465,9 @@ export default {
         :is-dark="common.currentTheme == 'dark'"
         @emojiClick="handleEmojiClick"
       />
+    </n-modal>
+    <n-modal v-model:show="taskMoveModal">
+      <task-move-dialog @closeModal="onCloseTaskMove" :task="currentTask" />
     </n-modal>
   </main>
 </template>
@@ -495,5 +518,9 @@ export default {
 }
 #edit-task-drawer .n-drawer-footer {
   justify-content: space-between;
+}
+.project-no-data {
+  pointer-events: none;
+  user-select: none;
 }
 </style>

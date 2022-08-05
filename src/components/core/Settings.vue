@@ -53,7 +53,7 @@ export default {
         Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet ipsa tempora sequi error quia velit, non harum eum temporibus esse, magnam accusamus consequatur doloribus voluptates maiores! Ipsam, voluptate, numquam officia a quaerat architecto dicta suscipit non qui veritatis omnis eaque provident hic iure quis perspiciatis. Explicabo illum totam dolorem minima doloremque, perspiciatis, laborum, a dolor omnis veniam dolores quia sapiente nesciunt necessitatibus neque nostrum debitis iusto magni obcaecati voluptate ut recusandae earum. Laborum numquam, suscipit asperiores voluptate accusamus ea molestiae aperiam labore reiciendis dicta nostrum ratione voluptas? Illo debitis, maiores, neque rerum ipsum cumque quisquam, cupiditate excepturi ab asperiores velit.
       </n-tab-pane>
     </n-tabs>
-    <template #footer>
+    <template #action>
       <n-space justify="end">
         <n-button primary type="error">Close</n-button>
       </n-space>
@@ -63,5 +63,11 @@ export default {
 <style>
 #settings {
   width: 75vw;
+}
+
+@media screen  and (max-width: 720px) {
+  #settings {
+    width: 100vw;
+  }
 }
 </style>

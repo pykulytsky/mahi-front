@@ -8,6 +8,7 @@ import Project from "../views/tasks/Project.vue";
 import Tags from "../views/tasks/Tags.vue";
 import Today from "../views/tasks/Today.vue";
 import Calendar from "../views/tasks/Calendar.vue";
+import Day from "../views/tasks/Day.vue";
 import AppHome from "../views/AppHome.vue";
 import Timeline from "../views/Timeline.vue";
 import { useAuthStore } from "../stores/auth";
@@ -77,6 +78,12 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: "/app/day/:date(\\d{4}-[0-1][0-9]-[0-3][0-9]$)",
+      component: Day,
+      name: "day",
+      meta: {requiresAuth: true}
+    },
+    {
       path: "/app/timeline",
       component: Timeline,
       name: "timeline",
@@ -95,20 +102,24 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from) => {
-  const auth = useAuthStore();
-  // instead of having to check every route record with
-  // to.matched.some(record => record.meta.requiresAuth)
-  if (to.meta.requiresAuth && !auth.isAuthenticated) {
-    try {
-      auth.loadCurrentUser();
-    } catch {
+  if (to.meta.requiresAuth) {
+    const token = localStorage.getItem("token")
+    if (token == "null" || token == null) {
       return {
         path: "/login",
-        // save the location we were at to come back later
         query: { redirect: to.fullPath },
       };
+    } else {
+      const exp = JSON.parse(localStorage.getItem("exp"))
+      if (exp <= Date.now() / 1000 || exp == null) {
+        return {
+          path: "/login",
+          query: { redirect: to.fullPath },
+        };
+      }
     }
   }
+
 });
 
 export default router;
