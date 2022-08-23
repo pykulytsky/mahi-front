@@ -14,12 +14,20 @@ import {
   NDatePicker,
   NPopconfirm,
   NSlider,
+  NSelect,
+  NPopselect,
+  NPopover
 } from "naive-ui";
 import {
   CalendarOutline,
   AlarmOutline,
   PricetagOutline,
   ColorFilterOutline,
+  Warning,
+  WarningOutline,
+  Star,
+  StarOutline,
+  Alarm
 } from "@vicons/ionicons5";
 import { ExclamationMark } from "@vicons/tabler";
 import { storeToRefs } from "pinia";
@@ -27,6 +35,7 @@ import { addTask } from "../../api/tasks.api";
 import { addTag } from "../../api/tags.api";
 import { useTaskStore } from "../../stores/task";
 import { useCommonStore } from "../../stores/common";
+import { useRoute } from "vue-router";
 import ColorPicker from "../core/ColorPicker.vue";
 export default {
   components: {
@@ -48,10 +57,19 @@ export default {
     NSlider,
     ColorPicker,
     ColorFilterOutline,
+    NSelect,
+    Warning,
+    WarningOutline,
+    Star,
+    StarOutline,
+    NPopselect,
+    Alarm,
+    NPopover
   },
   emits: ["closeTaskForm", "updateProject"],
   setup(props, ctx) {
     const task = useTaskStore();
+    const route = useRoute();
     const common = useCommonStore();
     const { tags } = storeToRefs(task);
     const autoCompleteInstRef = ref(null);
@@ -59,14 +77,46 @@ export default {
     const message = useMessage();
     const datePickerIsShown = ref(false);
     const priority = ref(null);
+    const reminder = ref(null)
+    const customReminderPopover = ref(false)
     const newTask = ref({
       name: null,
       description: null,
       tags: [],
-      deadline: null,
+      deadline:
+        route.name == "day"
+          ? new Date(route.params.date).toISOString().split("T")[0]
+          : null,
       priority: null,
       color: null,
+      isImportant: false,
+      remind_at: null
     });
+
+    const projects = computed(() => {
+      if (route.name == "day") {
+        let existedProjects = [];
+        task.projects.forEach((project) => {
+          existedProjects.push({
+            label: project.name,
+            value: project.id,
+          });
+        });
+        return existedProjects;
+      } else {
+        return null;
+      }
+    });
+    const project = ref(null);
+
+    function isValidDate(d) {
+      if (Object.prototype.toString.call(d) === "[object Date]") {
+        // it is a date
+        return !isNaN(d);
+      } else {
+        return false
+      }
+    }
 
     watch(priority, (value) => {
       switch (value) {
@@ -84,12 +134,27 @@ export default {
           break;
       }
     });
+    watch(reminder, (value) => {
+      const date = new Date(value)
+      if (value !== null) {
+        if (isValidDate(date)) {
+          newTask.value.remind_at = date
+        } else if(value == "custom") {
+          customReminderPopover.value = true
+        }
+      }
+    })
 
     return {
       autoCompleteInstRef,
       newTask,
       task,
+      route,
       tags,
+      projects,
+      project,
+      reminder,
+      customReminderPopover,
       datePickerIsShown,
       inputValue: inputValueRef,
       prioritySteps: {
@@ -121,13 +186,17 @@ export default {
           message.error("Fill the task name.");
         } else {
           common.setLoading(true);
+          const projectID =
+            route.name == "day" ? project.value : task.currentProject.id;
+          console.log(projectID);
           addTask(
             newTask.value.name,
-            task.currentProject.id,
+            projectID,
             newTask.value.description,
             newTask.value.deadline,
             newTask.value.priority,
-            newTask.value.color
+            newTask.value.color,
+            newTask.value.isImportant
           ).then((response) => {
             newTask.value.tags.forEach((tag) => {
               addTag(
@@ -141,6 +210,22 @@ export default {
           });
         }
       },
+      reminderDateDisabled(date) {
+        const now = new Date()
+        return new Date(date) < now
+      },
+      reminderTimeDisabled(time) {
+        const now = new Date()
+        const selected = new Date(time)
+        return {
+          isHourDisabled: (hour) => {
+            return hour < now.getHours()
+          },
+          isMinuteDisabled: (minute) => {
+            return minute <= now.getMinutes()
+          }
+        }
+      }
     };
   },
 };
@@ -197,20 +282,25 @@ export default {
             </n-button>
           </template>
         </n-dynamic-tags>
-        <n-tooltip trigger="hover" v-if="!datePickerIsShown">
+        <n-tooltip
+          trigger="hover"
+          v-if="!datePickerIsShown && route.name !== 'day'"
+        >
           <template #trigger>
-            <n-button @click="datePickerIsShown = true" strong secondary circle>
-              <template #icon>
-                <n-icon>
-                  <calendar-outline />
-                </n-icon>
-              </template>
+            <n-button
+              @click="datePickerIsShown = true"
+              text
+              style="font-size: 1.2rem"
+            >
+              <n-icon>
+                <calendar-outline />
+              </n-icon>
             </n-button>
           </template>
           Add deadline
         </n-tooltip>
         <n-date-picker
-          style="width: 11vw;"
+          style="width: 11vw"
           v-motion-slide-bottom
           size="small"
           v-if="datePickerIsShown"
@@ -218,17 +308,51 @@ export default {
           type="date"
           value-format="yyyy-MM-dd"
         />
-        <n-tooltip trigger="hover">
+        <n-select
+          style="width: 10vw"
+          v-model:value="project"
+          :options="projects"
+          placeholder="Select project"
+          v-if="route.name == 'day'"
+        />
+        <n-popover trigger="manual" :show="customReminderPopover">
           <template #trigger>
-            <n-button strong secondary circle>
-              <template #icon>
-                <n-icon>
-                  <alarm-outline />
-                </n-icon>
+          <n-popselect v-model:value="reminder" :options="task.reminderOptions" trigger="click">
+            <n-tooltip trigger="hover">
+              <template #trigger>
+                <n-button text style="font-size: 1.2rem">
+                  <n-icon v-if="!newTask.remind_at">
+                    <alarm-outline />
+                  </n-icon>
+                  <n-icon v-else>
+                    <alarm />
+                  </n-icon>
+                </n-button>
               </template>
+              Add reminder
+            </n-tooltip>
+          </n-popselect>
+          </template>
+          <n-date-picker
+            v-click-outside="() => {
+            customReminderPopover = false
+            }"
+            panel
+            type="datetime"
+            :is-date-disabled="reminderDateDisabled"
+            :is-time-disabled="reminderTimeDisabled"
+          />
+        </n-popover>
+        <n-tooltip>
+          <template #trigger>
+            <n-button @click="newTask.isImportant = !newTask.isImportant" text style="font-size: 1.2rem">
+              <n-icon>
+                <star-outline v-if="!newTask.isImportant" />
+                <star v-else />
+              </n-icon>
             </n-button>
           </template>
-          Add reminder
+          Mark as important
         </n-tooltip>
         <n-popconfirm
           :show-icon="false"
@@ -238,35 +362,11 @@ export default {
           <template #trigger>
             <n-tooltip trigger="hover">
               <template #trigger>
-                <n-button strong secondary circle>
-                  <template #icon>
-                    <n-icon>
-                      <exclamation-mark />
-                    </n-icon>
-                  </template>
-                </n-button>
-              </template>
-              Add priority
-            </n-tooltip>
-          </template>
-          <n-space vertical style="width: 250px; margin-right: 10px">
-            <n-slider
-              step="mark"
-              :tooltip="false"
-              v-model:value="priority"
-              :marks="prioritySteps"
-            />
-          </n-space>
-        </n-popconfirm>
-        <n-popconfirm
-          :show-icon="false"
-          :positive-text="null"
-          :negative-text="null"
-        >
-          <template #trigger>
-            <n-tooltip trigger="hover">
-              <template #trigger>
-                <n-button strong secondary circle v-if="newTask.color == null">
+                <n-button
+                  text
+                  style="font-size: 1.2rem"
+                  v-if="newTask.color == null"
+                >
                   <template #icon>
                     <n-icon>
                       <color-filter-outline />
@@ -280,7 +380,7 @@ export default {
                     width: '15px',
                     height: '15px',
                     borderRadius: '50%',
-                    backgroundColor: newTask.color
+                    backgroundColor: newTask.color,
                   }"
                 ></div>
               </template>

@@ -9,6 +9,7 @@ import Tags from "../views/tasks/Tags.vue";
 import Today from "../views/tasks/Today.vue";
 import Calendar from "../views/tasks/Calendar.vue";
 import Day from "../views/tasks/Day.vue";
+import Tag from "../views/tasks/Tag.vue";
 import AppHome from "../views/AppHome.vue";
 import Timeline from "../views/Timeline.vue";
 import { useAuthStore } from "../stores/auth";
@@ -63,6 +64,12 @@ const router = createRouter({
       path: "/app/tags",
       component: Tags,
       name: "tags",
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/app/tags/:id",
+      component: Tag,
+      name: "tag",
       meta: { requiresAuth: true },
     },
     {

@@ -16,7 +16,7 @@ import {
   useLoadingBar,
   useMessage,
   useDialog,
-  NSkeleton
+  NSkeleton,
 } from "naive-ui";
 import { VuemojiPicker } from "vuemoji-picker";
 import {
@@ -30,15 +30,15 @@ import { useTaskStore } from "../../stores/task";
 import { useCommonStore } from "../../stores/common";
 import Task from "../../components/tasks/Task.vue";
 import draggable from "vuedraggable";
-import TodoCreateForm from "../../components/tasks/TaskCreateForm.vue";
-import TaskMoveDialog from "../../components/tasks/TaskMoveDialog.vue"
+import TaskCreateForm from "../../components/tasks/TaskCreateForm.vue";
+import TaskMoveDialog from "../../components/tasks/TaskMoveDialog.vue";
 import TaskEdit from "../../components/tasks/TaskEdit.vue";
 import { storeToRefs } from "pinia";
 import { updateTask, deleteTask } from "../../api/tasks.api";
 import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 import { updateProject, deleteProject } from "../../api/projects.api";
-import { useElementVisibility } from '@vueuse/core'
-import ColorPicker from "../../components/core/ColorPicker.vue"
+import { useElementVisibility } from "@vueuse/core";
+import ColorPicker from "../../components/core/ColorPicker.vue";
 export default {
   components: {
     NPageHeader,
@@ -51,7 +51,7 @@ export default {
     NIcon,
     EllipsisHorizontalCircle,
     NSpace,
-    TaskItem: Task,
+    Task,
     NDrawer,
     NDrawerContent,
     Star,
@@ -61,12 +61,12 @@ export default {
     Pin,
     PinnedOff,
     NModal,
-    TodoCreateForm,
+    TaskCreateForm,
     TaskEdit,
     AddCircle,
     NSkeleton,
     TaskMoveDialog,
-    ColorPicker
+    ColorPicker,
   },
   setup() {
     const emoji = ref(null);
@@ -86,14 +86,14 @@ export default {
     const router = useRouter();
     const message = useMessage();
     const dialog = useDialog();
-    const addBtnRef = ref(null)
-    const addBtnIsVisible = useElementVisibility(addBtnRef)
-    const taskMoveModal = ref(false)
-    const editedTags = ref([])
+    const addBtnRef = ref(null);
+    const addBtnIsVisible = useElementVisibility(addBtnRef);
+    const taskMoveModal = ref(false);
+    const editedTags = ref([]);
 
     const projectThemeOverrides = ref({
-      common: "#aaaa"
-    })
+      common: "#aaaa",
+    });
 
     const randomImage = computed(() => {
       let choices = [Empty1, Empty2, Empty3];
@@ -119,6 +119,7 @@ export default {
         loadingBar.start();
       } else {
         tasksLoaded.value = true;
+        document.title = ` ${task.currentProject.icon} ${task.currentProject.name} | Mahi`;
         loadingBar.finish();
       }
     });
@@ -130,16 +131,7 @@ export default {
 
     const handleUpdateProject = () => {
       common.setLoading(true);
-      updateProject(
-        currentProject.value.id,
-        currentProject.value.name,
-        currentProject.value.description,
-        currentProject.value.icon,
-        currentProject.value.accent_color,
-        currentProject.value.is_favorite,
-        currentProject.value.is_pinned,
-        currentProject.value.is_editable
-      ).then(() => {
+      updateProject(currentProject.value).then(() => {
         task.fetchProject(route.params.id);
         common.setLoading(false);
       });
@@ -236,7 +228,7 @@ export default {
           case 7:
             break;
           case 8:
-            handleDeleteProject()
+            handleDeleteProject();
             break;
           case "lock":
             currentProject.value.is_editable = false;
@@ -246,6 +238,14 @@ export default {
             currentProject.value.is_editable = true;
             handleUpdateProject();
             break;
+          case "showCompleted":
+            currentProject.value.show_completed_tasks = true
+            handleUpdateProject();
+            break;
+          case "hideCompleted":
+            currentProject.value.show_completed_tasks = false
+            handleUpdateProject();
+            break
         }
       },
       addItem() {
@@ -267,7 +267,7 @@ export default {
           currentTask.value.description,
           currentTask.value.deadline,
           currentTask.value.is_done,
-          currentTask.value.color,
+          currentTask.value.color
         ).then(() => {
           task.fetchProject(route.params.id);
           taskDetailIsShown.value = false;
@@ -284,13 +284,12 @@ export default {
           common.setLoading(false);
         });
       },
-      handleButtonScroll(event) {
-      },
+      handleButtonScroll(event) {},
       onCloseTaskMove() {
-        taskMoveModal.value = false
-        taskDetailIsShown.value = false
-        task.fetchProject(route.params.id)
-      }
+        taskMoveModal.value = false;
+        taskDetailIsShown.value = false;
+        task.fetchProject(route.params.id);
+      },
     };
   },
 };
@@ -400,13 +399,13 @@ export default {
         </template>
         Add task
       </n-button>
-      <todo-create-form
+      <task-create-form
         @updateProject="task.fetchProject(route.params.id)"
         @close-task-form="taskFormIsShown = false"
         v-motion-slide-bottom
         v-if="taskFormIsShown"
       />
-      <task-item
+      <task
         v-for="(task, i) in currentTasks"
         @show-task-details="showTaskDetails"
         @changeTaskStatus="changeTaskStatus"
@@ -414,7 +413,7 @@ export default {
         v-motion-pop
         :delay="i * 100"
         :key="i"
-      ></task-item>
+      ></task>
       <img
         v-if="currentTasks.length == 0"
         class="project-no-data"
@@ -422,7 +421,13 @@ export default {
         :width="350"
         :height="350"
       />
-      <p v-if="currentTasks.length == 0" style="color: #ffa" class="project-no-data"><i>There is too empty! How about plan your next travel?</i></p>
+      <p
+        v-if="currentTasks.length == 0"
+        style="color: #ffa"
+        class="project-no-data"
+      >
+        <i>There is too empty! How about plan your next travel?</i>
+      </p>
     </div>
     <n-drawer
       :style="{

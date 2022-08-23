@@ -14,6 +14,8 @@ import { vElementVisibility } from '@vueuse/components'
 import VueObserveVisibility from 'vue-observe-visibility'
 import { Vue3Mq } from "vue3-mq";
 import { MotionPlugin } from '@vueuse/motion'
+import Vue3NativeNotification from 'vue3-native-notification'
+import vClickOutside from "click-outside-vue3"
 
 const app = createApp(App)
 
@@ -27,5 +29,9 @@ app.use(Vue3Mq, {
     preset: 'bootstrap5'
 })
 app.use(MotionPlugin)
+app.use(Vue3NativeNotification, {
+    requestOnNotify: true
+})
+app.use(vClickOutside)
 
 app.mount('#app')

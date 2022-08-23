@@ -10,8 +10,11 @@ const addTag = (tagID, taskID) => http.post("/tag_items", {
     task_id: taskID
 })
 
+const fetchTag = (tagID) => http.get("/tags/" + tagID)
+
 export {
     fetchTags,
     fetchUserTags,
-    addTag
+    addTag,
+    fetchTag
 }

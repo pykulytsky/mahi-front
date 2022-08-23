@@ -4,11 +4,13 @@ import { onMounted, onUnmounted } from "vue";
 import { useElementVisibility } from '@vueuse/core'
 import { ref } from "vue";
 import {useCommonStore} from "../stores/common"
+import ThemeViewer from "../components/home/ThemeViewer.vue"
 export default {
   components: {
     NGradientText,
     NButton,
-    NSpace
+    NSpace,
+    ThemeViewer
   },
   setup() {
     const common = useCommonStore()
@@ -137,10 +139,11 @@ export default {
       <img src="../assets/abstract/abstract31.png" id="abstract11" width="300" height="300" class="abstract" alt="">
       <img src="../assets/abstract/abstract9.png" id="abstract12" width="300" height="300" class="abstract" alt=""> -->
 
-      <img src="../assets/abstrakt/9.png" class="abstract" id="abstrakt1" alt="">
-      <img src="../assets/abstrakt/344.png" class="abstract" id="abstrakt2" alt="" width="700" height="700">
-      <img src="../assets/abstrakt/130.png" class="abstract" id="abstrakt3" alt="">
-      <img src="../assets/abstrakt/124.png" class="abstract" id="abstrakt4" alt="">
+<!--      <img src="../assets/abstrakt/9.png" class="abstract" id="abstrakt1" alt="">-->
+<!--      <img src="../assets/abstrakt/344.png" class="abstract" id="abstrakt2" alt="" width="700" height="700">-->
+<!--      <img src="../assets/abstrakt/130.png" class="abstract" id="abstrakt3" alt="">-->
+<!--      <img src="../assets/abstrakt/124.png" class="abstract" id="abstrakt4" alt="">-->
+
       <!-- <img src="../assets/colorful/1.svg" class="abstract" id="abstrakt1" alt="">
       <img src="../assets/colorful/2.svg" class="abstract" id="abstrakt2" alt="" width="700" height="700">
       <img src="../assets/colorful/3.svg" class="abstract" id="abstrakt3" alt="">
@@ -165,10 +168,11 @@ export default {
         </n-button>
         </div>
 
-        <img v-motion-slide-right :delay="500" src="../assets/abstrakt-design-344.png" alt="" width="650" height="650">
+        <img v-motion-slide-right id="header-girl" :delay="500" src="../assets/humanities/1.png" alt="" width="650" height="650">
         <!-- <img v-motion-slide-right :delay="500" src="../assets/colorful/image.svg" alt="" width="650" height="650"> -->
       </div>
     </div>
+    <theme-viewer />
     <div class="features">
       <div
         class="feature-item"
@@ -251,6 +255,9 @@ export default {
 }
 .header {
   padding: 10vh 1vw 35vh 10vw;
+  background: url("../assets/eyes1.svg");
+  background-size: cover;
+  height: 150vh;
 }
 .header-caption {
   margin-top: 15vh;
@@ -498,7 +505,7 @@ a::after {
   left: 0;
 }
 #navbar-center a::before {
-  background-color: #E28163FF;
+  background-color: var(--primary-color);
   height: 2px;
   bottom: 0;
   transform-origin: 100% 50%;
@@ -512,7 +519,7 @@ a::after {
   transform-origin: 100% 50%;
   transform: translate3d(200%, 0, 0);
   transition: transform .3s cubic-bezier(0.76, 0, 0.24, 1);
-  color: #E28163FF;
+  color: var(--primary-color);
 }
 
 #navbar-center a:hover::before {

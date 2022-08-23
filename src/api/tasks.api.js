@@ -1,12 +1,13 @@
 import http from "./axios"
 
-const addTask = (name, projectID, description, deadline, priority, color) => http.post("/tasks/", {
+const addTask = (name, projectID, description, deadline, priority, color, isImportant) => http.post("/tasks/", {
     name,
     project_id: projectID,
     description,
     deadline,
     priority,
-    color
+    color,
+    is_important: isImportant
 })
 
 const getTasksByProject = (
@@ -44,10 +45,13 @@ const deleteTask = (ID) => http.delete("/tasks/" + ID)
 
 const moveTask = (ID, projectID) => http.post(`/tasks/${ID}/move/${projectID}`)
 
+const fetchTasksByDate = (date) => http.get(`/tasks/date/${date}`)
+
 export {
   addTask,
   getTasksByProject,
   updateTask,
   deleteTask,
-  moveTask
+  moveTask,
+  fetchTasksByDate
 }

@@ -21,7 +21,8 @@ import {
   CalendarNumberOutline,
   CalendarOutline,
   PricetagOutline,
-  AddOutline
+  AddOutline,
+  CheckmarkDone,
 } from "@vicons/ionicons5";
 import { Lock, LockOpen } from "@vicons/tabler";
 const renderIcon = (icon) => {
@@ -31,6 +32,12 @@ const renderIcon = (icon) => {
     });
   };
 };
+
+function addHours(numOfHours, date = new Date()) {
+  date.setTime(date.getTime() + numOfHours * 60 * 60 * 1000);
+
+  return date;
+}
 
 export const useTaskStore = defineStore({
   id: "task",
@@ -145,7 +152,7 @@ export const useTaskStore = defineStore({
       if (
         state._projectOptions.filter((option) =>
           ["lock", "unlock"].includes(option.key)
-        ).length == 0
+        ).length === 0
       ) {
         if (state._currentProject.is_editable) {
           state._projectOptions.splice(2, 0, {
@@ -161,6 +168,25 @@ export const useTaskStore = defineStore({
           });
         }
       }
+      if (
+        state._projectOptions.filter((option) =>
+          ["showCompleted", "hideCompleted"].includes(option.key)
+        ).length === 0
+      ) {
+        if (state._currentProject.show_completed_tasks) {
+          state._projectOptions.splice(5, 0, {
+            label: "Hide completed tasks",
+            key: "hideCompleted",
+            icon: renderIcon(CheckmarkDone),
+          });
+        } else {
+          state._projectOptions.splice(5, 0, {
+            label: "Show completed tasks",
+            key: "showCompleted",
+            icon: renderIcon(CheckmarkDone),
+          });
+        }
+      }
       return state._projectOptions;
     },
     pinned: (state) => state._pinned,
@@ -170,6 +196,50 @@ export const useTaskStore = defineStore({
     currentTasks: (state) => state._currentTasks,
     tags: (state) => state._tags,
     menuOptions: (state) => state._menuOptions,
+    reminderOptions: (state) => {
+      const now = new Date()
+      const inOneHour = () => {
+        const date = addHours(1)
+        return `${date.getHours()}:${date.getMinutes()}`
+      }
+      const todayLater = () => {
+        const date = addHours(5)
+        return `${date.getHours()}:${date.getMinutes()}`
+      }
+      const tomorrowMorning = () => {
+        let tomorrow = new Date(now)
+        tomorrow.setDate(now.getDate() + 1)
+        tomorrow.setHours(9, 0, 0, 0)
+        return tomorrow
+      }
+
+      let options = [
+        {
+          label: `In 1 hour (${inOneHour()})`,
+          value: addHours(1).toISOString()
+        },
+        {
+          label: "Tomorrow (09:00)",
+          value: tomorrowMorning().toISOString()
+        },
+        {
+          label: `Tomorrow at the same time (${now.getHours()}:${now.getMinutes()})`,
+          value: new Date(new Date(now).setDate(now.getDate() + 1)).toISOString()
+        },
+        {
+          label: "Custom date",
+          value: "custom"
+        }
+      ]
+      if (now.getHours() < 18) {
+        options.splice(1, 0, {
+          label: `Today later (${todayLater()})`,
+          value: addHours(5).toISOString()
+        })
+      }
+
+      return options
+    }
   },
   actions: {
     setPinned(pinnedProjects) {
@@ -242,60 +312,59 @@ export const useTaskStore = defineStore({
         }
       });
     },
-  loadMenuProjects() {
-    if (this._menuOptions.length > 4) {
-      this._menuOptions.splice(5, this._menuOptions.length+1);
-    }
+    loadMenuProjects() {
+      if (this._menuOptions.length > 4) {
+        this._menuOptions.splice(5, this._menuOptions.length + 1);
+      }
 
-    this.pinned.forEach((project) => {
+      this.pinned.forEach((project) => {
+        this._menuOptions.push({
+          label: project.name,
+          key: project.id,
+          icon: () => (project.icon !== null ? project.icon : "🥥"),
+        });
+      });
       this._menuOptions.push({
-        label: project.name,
-        key: project.id,
-        icon: () => (project.icon !== null ? project.icon : "🥥"),
-      });
-    });
-    this._menuOptions.push({
-      key: "divider-2",
-      type: "divider",
-      props: {
-        style: {
-          marginLeft: "32px",
+        key: "divider-2",
+        type: "divider",
+        props: {
+          style: {
+            marginLeft: "32px",
+          },
         },
-      },
-    });
-    let favoritesGroup = {
-      label: "Favorites",
-      key: "favorites",
-      children: [],
-    };
-    this.favorites.forEach((project) => {
-      favoritesGroup.children.push({
-        label: project.name,
-        key: project.id,
-        icon: () => (project.icon !== null ? project.icon : "🥥"),
       });
-    });
-    this._menuOptions.push(favoritesGroup);
-    let projectsGroup = {
-      label: "Projects",
-      key: "projects",
-      children: [
-        {
-          label: "Add Project",
-          key: "add-project",
-          icon: renderIcon(AddOutline)
-        }
-      ],
-    };
-    this.projects.forEach((project) => {
-      projectsGroup.children.push({
-        label: project.name,
-        key: project.id,
-        icon: () => (project.icon !== null ? project.icon : "🥥"),
+      let favoritesGroup = {
+        label: "Favorites",
+        key: "favorites",
+        children: [],
+      };
+      this.favorites.forEach((project) => {
+        favoritesGroup.children.push({
+          label: project.name,
+          key: project.id,
+          icon: () => (project.icon !== null ? project.icon : "🥥"),
+        });
       });
-    });
-    this._menuOptions.push(projectsGroup);
+      this._menuOptions.push(favoritesGroup);
+      let projectsGroup = {
+        label: "Projects",
+        key: "projects",
+        children: [
+          {
+            label: "Add Project",
+            key: "add-project",
+            icon: renderIcon(AddOutline),
+          },
+        ],
+      };
+      this.projects.forEach((project) => {
+        projectsGroup.children.push({
+          label: project.name,
+          key: project.id,
+          icon: () => (project.icon !== null ? project.icon : "🥥"),
+        });
+      });
+      this._menuOptions.push(projectsGroup);
+    },
   },
-  },
-
 });

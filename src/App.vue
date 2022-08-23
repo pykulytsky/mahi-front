@@ -1,6 +1,5 @@
 <script>
 import { RouterView, useRoute, useRouter } from "vue-router";
-import HelloWorld from "@/components/HelloWorld.vue";
 import { ref, h, watch, computed, onMounted, onBeforeMount } from "vue";
 import { storeToRefs } from "pinia";
 import {
@@ -28,7 +27,8 @@ import {
   NAvatar,
   NDivider,
   NDropdown,
-  NModal
+  NModal,
+  lightTheme,
 } from "naive-ui";
 import {
   HomeOutline as HomeIcon,
@@ -37,21 +37,36 @@ import {
   SearchOutline,
   NotificationsOutline,
   PricetagOutline,
-  CalendarOutline,
-  CalendarNumberOutline,
 } from "@vicons/ionicons5";
-import { User as UserIcon, Sun, Moon } from "@vicons/tabler";
+import { useNativeNotifications } from "vue3-native-notification"
+import { User as UserIcon, Sun } from "@vicons/tabler";
 import { useCommonStore } from "./stores/common";
 import { useTaskStore } from "./stores/task";
-import { useAuthStore } from "./stores/auth"
+import { useAuthStore } from "./stores/auth";
 import AppProvider from "./app.provider.vue";
-import Settings from "./components/core/Settings.vue"
-import ProjectCreateForm from "./components/tasks/ProjectCreateForm.vue"
-const { loadingBar } = createDiscreteApi(["loadingBar"]);
+import Settings from "./components/core/Settings.vue";
+import ProjectCreateForm from "./components/tasks/ProjectCreateForm.vue";
+import notificationSound from "./assets/notification.wav"
+import {
+  SearchIcon,
+  HalfMoonIcon,
+  SidebarCollapseIcon,
+  SidebarExpandIcon,
+} from "iconoir-vue";
+
+const configProviderPropsRef = computed(() => ({
+  theme: localStorage.getItem("theme") === "light" ? lightTheme : darkTheme,
+}));
+
+const { loadingBar, notification } = createDiscreteApi(
+  ["loadingBar", "notification"],
+  {
+    configProviderProps: configProviderPropsRef,
+  }
+);
 
 export default {
   components: {
-    HelloWorld,
     NConfigProvider,
     NLayoutContent,
     NLayout,
@@ -78,31 +93,35 @@ export default {
     NSpace,
     NotificationsOutline,
     NAvatar,
-    SearchOutline,
     UserIcon,
     NDivider,
     Sun,
-    Moon,
     NDropdown,
     NModal,
     Settings,
-    ProjectCreateForm
+    ProjectCreateForm,
+    SearchIcon,
+    HalfMoonIcon,
+    SidebarCollapseIcon,
+    SidebarExpandIcon,
   },
 
   setup() {
+    const nativeNotification = useNativeNotifications()
+    const sound = new Audio(notificationSound)
     const route = useRoute();
     const path = computed(() => route.path);
     const common = useCommonStore();
-    const auth = useAuthStore()
+    const auth = useAuthStore();
     const task = useTaskStore();
     const { isLoading, currentTheme } = storeToRefs(common);
     const { projects } = storeToRefs(task);
     const searchInputEnabled = ref(false);
     const searchInput = ref(null);
     const router = useRouter();
-    const avatar = new URL('./assets/avatars/55.svg', import.meta.url).href
-    const showSettings = ref(false)
-    const showNewProject = ref(false)
+    const avatar = new URL("./assets/avatars/55.svg", import.meta.url).href;
+    const showSettings = ref(false);
+    const showNewProject = ref(false);
 
     const theme = ref(null);
     router.beforeEach(function (to, from, next) {
@@ -119,9 +138,9 @@ export default {
 
     watch(projects, (value, oldValue) => {
       if (value !== null && value !== oldValue) {
-        task.loadMenuProjects()
+        task.loadMenuProjects();
       }
-    })
+    });
     onBeforeMount(() => {
       // auth.setToken(localStorage.getItem("token"))
       // auth.setExp(localStorage.getItem("exp"))
@@ -131,6 +150,49 @@ export default {
     });
 
     onMounted(() => {
+      const token = localStorage.getItem("token");
+      const generalChanel = new EventSource(
+        "http://localhost:8000/sse/general/" + token,
+        { withCredentials: false }
+      );
+      generalChanel.addEventListener("new_message", function (event) {
+        sound.play()
+        notification.info({
+          title: "General Message",
+          content: event.data,
+          duration: 1e4,
+          placement: "top-left"
+        });
+        nativeNotification.show(
+          'Notification',
+          {
+            body: 'This is a simple notification',
+          },
+          {},
+        )
+      });
+      const personalChanel = new EventSource(
+        "http://localhost:8000/sse/personal/" + token,
+        { withCredentials: false }
+      );
+
+      personalChanel.addEventListener("new_message", function (event) {
+        sound.play()
+        notification.info({
+          title: "Personal message",
+          content: event.data,
+          duration: 1e4,
+          placement: "top-left",
+        });
+        nativeNotification.show(
+          'Notification',
+          {
+            body: 'This is a simple notification',
+          },
+          {},
+        )
+      });
+
       common.setTheme(localStorage.getItem("theme"));
       const sider = localStorage.getItem("siderIsShown");
       if (sider) {
@@ -164,12 +226,12 @@ export default {
         invertedColor: "#EED180",
       },
       Switch: {
-        railColorActive: "#ffa"
+        railColorActive: "#ffa",
       },
       Slider: {
         fillColor: "#ffa",
-        fillColorHover: "#EED180"
-      }
+        fillColorHover: "#EED180",
+      },
     };
 
     return {
@@ -200,8 +262,7 @@ export default {
           common.setTheme("light");
         }
       },
-      onScroll(event) {
-      },
+      onScroll(event) {},
       focusSearchInput() {
         searchInputEnabled.value = true;
         setTimeout(() => {
@@ -216,19 +277,19 @@ export default {
           router.push("/app/project/" + key);
         } else {
           if (key == "add-project") {
-            showNewProject.value = true
+            showNewProject.value = true;
           } else {
             router.push("/app/" + key);
           }
         }
       },
       handleUserMenuSelect(key) {
-        switch(key) {
+        switch (key) {
           case "settings":
-            showSettings.value = true
+            showSettings.value = true;
             break;
         }
-      }
+      },
     };
   },
 };
@@ -263,18 +324,16 @@ export default {
           >
             <div id="home-navbar-menu">
               <n-button text style="font-size: 1.5rem">
-                <n-icon>
-                  <menu-filled
-                    @click="common.setSiderVisability(!common.siderIsExpanded)"
+                <n-icon
+                  @click="common.setSiderVisability(!common.siderIsExpanded)"
+                >
+                  <sidebar-collapse-icon
+                    v-motion-fade
+                    v-if="!common.siderIsExpanded"
                   />
+                  <sidebar-expand-icon v-motion-fade v-else />
                 </n-icon>
               </n-button>
-              <n-button text style="font-size: 1.3rem">
-                <n-icon>
-                  <home-icon />
-                </n-icon>
-              </n-button>
-
             </div>
             <div id="navbar-right">
               <n-button
@@ -284,8 +343,8 @@ export default {
                 style="font-size: 1.5rem"
                 v-if="!searchInputEnabled"
               >
-                <n-icon>
-                  <search-outline />
+                <n-icon size="28">
+                  <search-icon />
                 </n-icon>
               </n-button>
               <n-auto-complete
@@ -296,7 +355,10 @@ export default {
                 placeholder="Search projects, tasks, tags, etc..."
               >
                 <template #prefix>
-                  <n-icon :component="SearchOutline" />
+                  <!--                  <n-icon :component="SearchOutline" />-->
+                  <n-icon size="25">
+                    <search-icon />
+                  </n-icon>
                 </template>
               </n-auto-complete>
 
@@ -315,18 +377,35 @@ export default {
                 style="font-size: 1.5rem; margin-right: 15px"
               >
                 <n-icon>
-                  <sun v-motion-slide-top v-if="common.currentTheme == 'light'" />
-                  <moon v-motion-slide-top v-else />
+                  <sun
+                    v-motion-slide-top
+                    v-if="common.currentTheme == 'light'"
+                  />
+                  <half-moon-icon v-motion-slide-top v-else />
                 </n-icon>
               </n-button>
-              <n-dropdown @select="handleUserMenuSelect" trigger="click" :options="auth.userDropdownMenuOptions">
-              <n-avatar :src="avatar" color="#ffa" id="navbar-avatar" round :size="30">
-              </n-avatar>
+              <n-dropdown
+                @select="handleUserMenuSelect"
+                trigger="click"
+                :options="auth.userDropdownMenuOptions"
+              >
+                <n-avatar
+                  :src="avatar"
+                  color="#ffa"
+                  id="navbar-avatar"
+                  round
+                  :size="30"
+                >
+                </n-avatar>
               </n-dropdown>
             </div>
           </n-layout-header>
           <n-scrollbar
-            v-if="!(['/', '/login', '/register', '/reset-password', '/app'].includes(path))"
+            v-if="
+              !['/', '/login', '/register', '/reset-password', '/app'].includes(
+                path
+              )
+            "
             @scroll="onScroll"
             trigger="hover"
             style="max-height: 95vh"
@@ -351,7 +430,14 @@ export default {
             />
           </n-layout-header> -->
 
-          <n-layout-content v-if="['/', '/login', '/register', '/reset-password', '/app'].includes(path)" @on-scroll="onScroll">
+          <n-layout-content
+            v-if="
+              ['/', '/login', '/register', '/reset-password', '/app'].includes(
+                path
+              )
+            "
+            @on-scroll="onScroll"
+          >
             <RouterView v-slot="{ Component }">
               <Transition name="fade">
                 <component :is="Component" />

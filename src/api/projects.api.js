@@ -1,51 +1,46 @@
-import http from "./axios"
+import http from "./axios";
 
-
-const updateProject = (
-    projectID,
+const updateProject = ({
+  id,
+  name,
+  description,
+  icon,
+  accent_color,
+  is_favorite,
+  is_pinned,
+  is_editable,
+  show_completed_tasks,
+}) =>
+  http.patch("/projects/" + id, {
     name,
     description,
     icon,
-    accentColor,
-    isFavorite,
-    isPinned,
-    isEditable
+    accent_color,
+    is_favorite,
+    is_pinned,
+    is_editable,
+    show_completed_tasks,
+  });
 
-) => http.patch("/projects/" + projectID, {
-    name,
-    description,
-    icon,
-    accent_color: accentColor,
-    is_favorite: isFavorite,
-    is_pinned: isPinned,
-    is_editable: isEditable
-})
+const deleteProject = (ID) => http.delete("/projects/" + ID);
 
-const deleteProject = (ID) => http.delete("/projects/" + ID)
+const fetchActivity = () => http.get("/users/me/activities");
 
-const fetchActivity = () => http.get("/users/me/activities")
-
-const createProject = (
-    {
-        name,
-        description,
-        color,
-        icon,
-        isFavorite,
-        isPinned
-    }
-) => http.post("/projects", {
+const createProject = ({
+  name,
+  description,
+  color,
+  icon,
+  isFavorite,
+  isPinned,
+}) =>
+  http.post("/projects", {
     name,
     description,
     accent_color: color,
     icon,
     is_favorite: isFavorite,
-    is_pinned: isPinned
-})
+    is_pinned: isPinned,
+  });
 
-export {
-    updateProject,
-    deleteProject,
-    fetchActivity,
-    createProject
-}
+export { updateProject, deleteProject, fetchActivity, createProject };

@@ -14,11 +14,12 @@ import {
 import {
   EllipsisVerticalOutline,
   CalendarClearOutline,
+  AlarmOutline
 } from "@vicons/ionicons5";
 import { ExclamationMark } from "@vicons/tabler";
 import { useCommonStore } from "../../stores/common";
 import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useMq } from "vue3-mq";
 export default {
   components: {
@@ -35,6 +36,7 @@ export default {
     NSpace,
     CalendarClearOutline,
     ExclamationMark,
+    AlarmOutline
   },
   emits: ["showTaskDetails", "changeTaskStatus"],
   props: {
@@ -52,6 +54,7 @@ export default {
     const descriptionIsShown = ref(false);
     const mq = useMq();
     const router = useRouter();
+    const route = useRoute()
     const taskPriorityType = computed(() => {
       switch (props.task.priority) {
         case "VERY HIGH":
@@ -69,9 +72,11 @@ export default {
       descriptionIsShown,
       mq,
       router,
+      route,
       taskPriorityType,
       themeOverrides,
       CalendarClearOutline,
+      AlarmOutline,
       onMouseEnter() {
         taskActionsIsShown.value = true;
       },
@@ -79,6 +84,19 @@ export default {
         taskActionsIsShown.value = false;
       },
       handleTaskFinish() {},
+      getOutlineColor() {
+        if (props.task.is_important) {
+          return '#e88080'
+        }
+        else {
+          if (props.task.color !== null) {
+            return props.task.color
+          }
+          else {
+            return 'var(--primary-color)'
+          }
+        }
+      },
     };
   },
 };
@@ -89,10 +107,10 @@ export default {
     :class="{
       task: common.currentTheme == 'light',
       'task-dark': common.currentTheme == 'dark',
+      'task-important': task.is_important
     }"
     :style="{
-      '--outline-color':
-        task.color !== null ? task.color : 'var(--primary-color)',
+      '--outline-color': getOutlineColor()
     }"
     @mouseenter="onMouseEnter"
     @mouseleave="onMouseLeave"
@@ -101,10 +119,8 @@ export default {
     <div class="task-title">
       <n-checkbox
         :style="{
-          '--checkbox-color':
-            task.color !== null ? task.color : 'var(--primary-color)',
-          '--n-color-checked':
-            task.color !== null ? task.color : 'var(--primary-color)',
+          '--checkbox-color': getOutlineColor(),
+          '--n-color-checked': getOutlineColor(),
           '--n-border-checked':
             task.color !== null
               ? `1px solid ${task.color}`
@@ -162,13 +178,28 @@ export default {
           <exclamation-mark></exclamation-mark>
         </n-icon>
       </n-tag>
+
+      <n-tag
+        size="small"
+        :type="new Date(task.remind_at) >= new Date()? 'default': 'error'"
+        bordered
+        v-if="task.remind_at"
+        :style="{
+          fontFamily: 'Josefin Sans',
+        }"
+      >
+        {{ task.remind_at }}
+        <template #icon>
+          <n-icon :component="AlarmOutline" />
+        </template>
+      </n-tag>
       <n-tag
         class="detail-tag"
         @click="router.push('/app/day/' + task.deadline)"
         size="small"
-        type="error"
+        :type="new Date(task.deadline) >= new Date()? 'default': 'error'"
         bordered
-        v-if="task.deadline"
+        v-if="task.deadline && route.name !== 'day'"
         :style="{
           fontFamily: 'Josefin Sans',
         }"
@@ -180,7 +211,7 @@ export default {
       </n-tag>
       <n-tag
         class="detail-tag"
-        @click="router.push('/app/tag/' + tag.name)"
+        @click="router.push('/app/tags/' + tag.name)"
         size="small"
         v-for="tag in task.tags"
         :key="tag.name"
@@ -225,6 +256,9 @@ export default {
 
   transition: all 0.3s ease-in-out;
   background-color: #18181c;
+}
+.task-important {
+  border: 1px solid #e88080;
 }
 .task:hover,
 .task-dark:hover {
